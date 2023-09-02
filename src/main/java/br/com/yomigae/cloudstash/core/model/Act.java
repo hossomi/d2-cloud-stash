@@ -2,6 +2,7 @@ package br.com.yomigae.cloudstash.core.model;
 
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Math.*;
 
 public record Act(Difficulty difficulty, int act) {
 
@@ -14,7 +15,7 @@ public record Act(Difficulty difficulty, int act) {
 
     public static Act fromAbsoluteAct(int act) {
         return new Act(
-                Difficulty.fromIndex(act % ACTS_PER_DIFFICULTY),
-                Math.floorDiv(act, ACTS_PER_DIFFICULTY));
+                Difficulty.fromIndex(floorDiv(act, ACTS_PER_DIFFICULTY)),
+                floorMod(act, ACTS_PER_DIFFICULTY));
     }
 }

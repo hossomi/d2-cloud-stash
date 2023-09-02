@@ -1,6 +1,6 @@
 package br.com.yomigae.cloudstash.core.model;
 
-import br.com.yomigae.cloudstash.core.io.D2LocalData;
+import br.com.yomigae.cloudstash.core.io.D2Strings;
 import br.com.yomigae.cloudstash.core.io.D2Data;
 import br.com.yomigae.cloudstash.core.parser.D2DataException;
 import lombok.Builder;
@@ -19,14 +19,15 @@ public record Skill(int id, String name) {
     static {
         Map<String, String> skillNames = D2Data
                 .readTableFile("/data/skilldesc.txt")
-                .collect(toMap(row -> row.get("skilldesc"), row -> row.get("str name")));
-
-        D2LocalData skillNameData = D2Data.readLocalFile("/data/local/skills.json");
+                .collect(toMap(
+                        row -> row.get("skilldesc"),
+                        row -> row.get("str name")));
 
         SKILLS = D2Data.readTableFile("/data/skills.txt")
+                .filter(row -> D2Strings.contains(skillNames.get(row.get("skilldesc"))))
                 .map(row -> Skill.builder()
                         .id(row.getInt("*Id"))
-                        .name(skillNameData.get(skillNames.get(row.get("skilldesc"))))
+                        .name(D2Strings.get(skillNames.get(row.get("skilldesc"))))
                         .build())
                 .toList();
     }

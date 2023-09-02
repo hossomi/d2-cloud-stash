@@ -3,11 +3,15 @@ package br.com.yomigae.cloudstash.core.io;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -20,9 +24,8 @@ import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.StreamSupport.stream;
 
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class D2Data {
-
-    private static final JsonMapper JSON = new JsonMapper();
 
     public static Stream<Row> readTableFile(String filename) {
         try (InputStream inputStream = D2Data.class.getResourceAsStream(filename)) {
@@ -49,37 +52,18 @@ public class D2Data {
 
             return reader.lines()
                     .map(line -> new Row(columns, line.split("\t")))
-                    .filter(row -> !row.values[0].equalsIgnoreCase("Expansion"));
-        }
-    }
-
-    public static D2LocalData readLocalFile(String filename) {
-        try (InputStream inputStream = D2Data.class.getResourceAsStream(filename)) {
-            if (inputStream == null) {
-                throw new D2ReaderException("Could not find file: " + filename);
-            }
-
-            JsonNode root = JSON.readTree(inputStream);
-            if (!root.isArray()) {
-                throw new D2ReaderException("Expected root object to be an array");
-            }
-
-            return stream(spliteratorUnknownSize(root.elements(), ORDERED), false)
-                    .filter(node -> node instanceof ObjectNode)
-                    .map(node -> (ObjectNode) node)
-                    .collect(
-                            D2LocalData::new,
-                            (locale, node) -> locale.put(
-                                    node.get("id").intValue(),
-                                    node.get("Key").textValue(),
-                                    node.get("enUS").textValue()),
-                            noop());
-        } catch (IOException e) {
-            throw new D2ReaderException("Error reading file: " + filename, e);
+                    .filter(row -> !row.values[0].equalsIgnoreCase("Expansion"))
+                    // Preemptively read all data because the reader will be closed.
+                    .toList().stream();
         }
     }
 
     public record Row(Map<String, Integer> columns, String[] values) {
+
+        public boolean has(String column) {
+            return columns.containsKey(column);
+        }
+
         public String get(String column) {
             Integer index = columns.get(column);
             if (index == null) {

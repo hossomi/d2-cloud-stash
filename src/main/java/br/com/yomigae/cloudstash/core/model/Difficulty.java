@@ -9,7 +9,7 @@ public enum Difficulty {
         if (index < 0 || index >= values().length) {
             throw new IllegalArgumentException(String.format(
                     "Invalid Difficulty index (%d-%d): %d",
-                    0, VALUES.length, index));
+                    0, VALUES.length - 1, index));
         }
         return VALUES[index];
     }
