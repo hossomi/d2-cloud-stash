@@ -35,7 +35,7 @@ The header is a fixed-size section with file metadata and basic character state.
 | `0x00AB` | `int`          | Map ID (?)                                                                                                                                                           |
 | `0x00AF` | 2              | ?                                                                                                                                                                    |
 | `0x00B1` | `short`        | Mercenary dead                                                                                                                                                       |
-| `0x00B3` | `int`          | Mercenary ID                                                                                                                                                         |
+| `0x00B3` | `int`          | Mercenary seed (?)                                                                                                                                                   |
 | `0x00B7` | `short`        | Mercenary name ID                                                                                                                                                    |
 | `0x00B9` | `short`        | Mercenary type                                                                                                                                                       |
 | `0x00BB` | `int`          | Mercenary experience                                                                                                                                                 |

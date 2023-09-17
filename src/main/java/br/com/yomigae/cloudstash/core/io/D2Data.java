@@ -75,5 +75,9 @@ public class D2Data {
         public int getInt(String column) {
             return Integer.parseInt(get(column));
         }
+
+        public double getDouble(String column) {
+            return Double.parseDouble(get(column));
+        }
     }
 }

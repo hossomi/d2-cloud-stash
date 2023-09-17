@@ -161,6 +161,10 @@ public class D2BinaryReader {
         return (int) (flipBytes(read(32), 4) & 0xFFFFFFFFL);
     }
 
+    public short readShort() {
+        return (short) (flipBytes(read(16), 2) & 0x0000FFFFL);
+    }
+
     public String readString(int size) {
         StringBuilder string = new StringBuilder(size);
 

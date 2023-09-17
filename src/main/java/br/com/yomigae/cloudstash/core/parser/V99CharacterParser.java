@@ -3,11 +3,11 @@ package br.com.yomigae.cloudstash.core.parser;
 import br.com.yomigae.cloudstash.core.io.D2BinaryReader;
 import br.com.yomigae.cloudstash.core.model.*;
 import br.com.yomigae.cloudstash.core.model.Character.CharacterBuilder;
+import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
+import br.com.yomigae.cloudstash.core.model.hireling.HirelingType;
 
 import java.time.Instant;
 import java.util.stream.IntStream;
-
-import static java.util.Objects.requireNonNull;
 
 public class V99CharacterParser extends VersionCharacterParser {
 
@@ -20,9 +20,10 @@ public class V99CharacterParser extends VersionCharacterParser {
         character.activeEquipmentSet(EquipmentSet.fromIndex(reader.readInt()));
 
         byte flags = reader.skipBytes(16).readByte();
+        boolean expansion = (flags & 0x20) > 0;
         character
                 .ladder((flags & 0x40) > 0)
-                .expansion((flags & 0x20) > 0)
+                .expansion(expansion)
                 .dead((flags & 0x08) > 0)
                 .hardcore((flags & 0x04) > 0);
 
@@ -47,5 +48,16 @@ public class V99CharacterParser extends VersionCharacterParser {
                                 Skill.fromId(reader.readInt()),
                                 Skill.fromId(reader.readInt()))))
                 .name(reader.setBytePos(0x010B).readString(16));
+
+        boolean hirelingDead = reader.setBytePos(0x00B1).readShort() > 0;
+        int hirelingNameId = reader.skipBytes(4).readShort();
+        HirelingType hirelingType = HirelingType.fromId(reader.readShort() + (expansion ? 100 : 0));
+        Hireling hireling = Hireling.builder()
+                .type(hirelingType)
+                .name(hirelingType.names().get(hirelingNameId))
+                .dead(hirelingDead)
+                .experience(reader.readInt())
+                .build();
+        System.out.println(hireling);
     }
 }

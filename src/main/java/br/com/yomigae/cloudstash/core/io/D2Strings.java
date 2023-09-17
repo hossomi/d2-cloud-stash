@@ -9,16 +9,13 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Streams;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Value;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static br.com.yomigae.cloudstash.core.util.FunctionUtils.noop;
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.StreamSupport.stream;
@@ -33,7 +30,7 @@ public class D2Strings {
         Streams
                 .concat(
                         readStringsFile("/data/local/skills.json"),
-                        readStringsFile("/data/local/item-names.json"))
+                        readStringsFile("/data/local/mercenaries.json"))
                 .forEach(node -> put(
                         node.get("id").intValue(),
                         node.get("Key").textValue(),
@@ -86,5 +83,14 @@ public class D2Strings {
             throw new D2DataException("Unknown string key: " + key);
         }
         return value;
+    }
+
+    public static Integer id(String key) {
+        Integer id = KEYS.inverse().get(key);
+        if (id == null) {
+            throw new D2DataException("Unknown string key: " + key);
+        }
+
+        return id;
     }
 }
