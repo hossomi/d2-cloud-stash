@@ -1,20 +1,16 @@
 package br.com.yomigae.cloudstash.core.util;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BreakpointMapTest {
 
-    // Use a LinkedHashMap to keep keys unordered and make sure it still works
-    private final BreakpointMap<String> breakpoints = new BreakpointMap<>(new LinkedHashMap<>() {{
-        put(5, "A");
-        put(15, "C");
-        put(10, "B");
-    }});
+    private final BreakpointMap<String> map = new BreakpointMap<>(Map.of(5, "A", 15, "C", 10, "B"));
 
     @ParameterizedTest
     @CsvSource(textBlock = """
@@ -27,6 +23,31 @@ class BreakpointMapTest {
             666, C
             """)
     void getReturnsBreakpointValue(int key, String value) {
-        assertThat(breakpoints.get(key)).isEqualTo(value);
+        assertThat(map.get(key)).isEqualTo(value);
+    }
+
+    @ParameterizedTest
+    @CsvSource(textBlock = """
+            0, 5
+            5, 5
+            7, 5
+            10, 10
+            12, 10
+            15, 15
+            16, 15
+            666, 15
+            """)
+    void breakpointReturnsHighestBreakpointForKey(int key, int breakpoint) {
+        assertThat(map.breakpoint(key)).isEqualTo(breakpoint);
+    }
+
+    @Test
+    void breakpointsAreSorted() {
+        assertThat(map.breakpoints()).containsExactly(5, 10, 15);
+    }
+
+    @Test
+    void valuesAreSorted() {
+        assertThat(map.values()).containsExactly("A", "B", "C");
     }
 }

@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static br.com.yomigae.cloudstash.core.io.D2BinaryReader.SIZEOF_INT;
 import static br.com.yomigae.cloudstash.core.io.LongBinaryAssert.assertThatBinary;
 import static br.com.yomigae.cloudstash.core.util.Utils.binaryStringToLong;
-import static java.lang.Long.parseLong;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

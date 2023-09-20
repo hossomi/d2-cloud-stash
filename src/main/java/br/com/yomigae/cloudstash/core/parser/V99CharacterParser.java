@@ -47,17 +47,11 @@ public class V99CharacterParser extends VersionCharacterParser {
                         new Dual<>(
                                 Skill.fromId(reader.readInt()),
                                 Skill.fromId(reader.readInt()))))
-                .name(reader.setBytePos(0x010B).readString(16));
-
-        boolean hirelingDead = reader.setBytePos(0x00B1).readShort() > 0;
-        int hirelingNameId = reader.skipBytes(4).readShort();
-        HirelingType hirelingType = HirelingType.fromId(reader.readShort() + (expansion ? 100 : 0));
-        Hireling hireling = Hireling.builder()
-                .type(hirelingType)
-                .name(hirelingType.names().get(hirelingNameId))
-                .dead(hirelingDead)
-                .experience(reader.readInt())
-                .build();
-        System.out.println(hireling);
+                .name(reader.setBytePos(0x010B).readString(16))
+                .hireling(new Hireling(
+                        reader.setBytePos(0x00B1).readShort() > 0,
+                        reader.skipBytes(4).readShort(),
+                        HirelingType.fromId(reader.readShort(), expansion),
+                        reader.readInt()));
     }
 }

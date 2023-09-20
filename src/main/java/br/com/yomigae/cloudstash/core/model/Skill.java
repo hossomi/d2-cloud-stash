@@ -8,6 +8,7 @@ import lombok.Builder;
 import java.util.List;
 import java.util.Map;
 
+import static br.com.yomigae.cloudstash.core.util.ValidationUtil.throwOnNull;
 import static com.google.common.collect.Maps.uniqueIndex;
 import static java.util.stream.Collectors.toMap;
 
@@ -35,11 +36,7 @@ public record Skill(int id, String name) {
     private static final Map<Integer, Skill> SKILLS_BY_ID = uniqueIndex(SKILLS, Skill::id);
 
     public static Skill fromId(int id) {
-        Skill skill = SKILLS_BY_ID.get(id);
-        if (skill == null) {
-            throw new D2DataException("Unknown skill ID: " + id);
-        }
-        return skill;
+        return throwOnNull(SKILLS_BY_ID.get(id), () -> new D2DataException("Unknown skill ID: " + id));
     }
 
     public static Skill fromName(String name) {

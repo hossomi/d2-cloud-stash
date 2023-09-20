@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static br.com.yomigae.cloudstash.core.model.Attribute.*;
+import static br.com.yomigae.cloudstash.core.util.ValidationUtil.throwOnNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
@@ -37,12 +38,13 @@ public record HirelingType(
 
     static {
         HIRELINGS = D2Data.readTableFile("/data/hireling.txt")
-                .collect(groupingBy(r -> r.getInt("Id")+r.getInt("Version")))
+                // Expansion hirelings may have the same ID. Use version as well to group.
+                .collect(groupingBy(r -> r.getInt("Id") + "/" + r.getInt("Version")))
                 .values().stream()
                 .map(rows -> {
                     Row sample = rows.get(0);
                     return HirelingType.builder()
-                            .id(sample.getInt("Id") + sample.getInt("Version"))
+                            .id(sample.getInt("Id"))
                             .klass(HirelingClass.fromName(sample.get("Hireling")))
                             .act(new Act(
                                     Difficulty.fromIndex(sample.getInt("Difficulty") - 1),
@@ -94,23 +96,39 @@ public record HirelingType(
                             .attribute(POISON_RESISTANCE, toBreakpointScaling(rows, row -> new Scaling.Linear(
                                     row.getInt("ResistPoison"),
                                     row.getDouble("ResistPoison/Lvl") / 8)))
-                            .attribute(EXPERIENCE_NEXT_LEVEL, toBreakpointScaling(rows, row -> new Scaling.Experience(
-                                    row.getInt("Exp/Lvl")))).build();
+                            .attribute(EXPERIENCE_NEXT_LEVEL, new Scaling.Breakpoint(toBreakpointMap(rows,
+                                    row -> new Scaling.Experience(row.getInt("Level"), row.getInt("Exp/Lvl")))))
+                            .build();
                 })
                 .toList();
     }
 
     private static <S extends Scaling> Scaling.Breakpoint toBreakpointScaling(List<Row> rows, Function<Row, S> scaling) {
-        return new Scaling.Breakpoint(rows.stream().collect(
-                BreakpointMap::new,
-                (bp, row) -> bp.put(row.getInt("Level"), scaling.apply(row)),
-                BreakpointMap::putAll));
+        return new Scaling.Breakpoint(toBreakpointMap(rows, scaling));
     }
 
-    public static HirelingType fromId(int id) {
+    private static <S extends Scaling> BreakpointMap<Scaling> toBreakpointMap(List<Row> rows, Function<Row, S> scaling) {
+        return rows.stream().collect(
+                BreakpointMap::new,
+                (bp, row) -> bp.put(row.getInt("Level"), scaling.apply(row)),
+                BreakpointMap::putAll);
+    }
+
+    public static HirelingType fromId(int id, boolean expansion) {
         return HIRELINGS.stream()
+                .filter(hireling -> hireling.expansion == expansion)
                 .filter(hireling -> hireling.id == id)
                 .findAny()
-                .orElseThrow(() -> new D2DataException("Unknown hireling ID: " + id));
+                .orElseThrow(() -> new D2DataException(String.format(
+                        "Unknown hireling ID: %d (%s)",
+                        id, expansion ? "expansion" : "normal")));
+    }
+
+    public Scaling attribute(Attribute attribute) {
+        return throwOnNull(attributes.get(attribute), () -> new D2DataException("Invalid attribute: " + attribute));
+    }
+
+    public Scaling skill(Skill skill) {
+        return throwOnNull(skills.get(skill), () -> new D2DataException("Invalid skill: " + skill));
     }
 }

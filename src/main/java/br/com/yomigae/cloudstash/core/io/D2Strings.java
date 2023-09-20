@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static br.com.yomigae.cloudstash.core.util.ValidationUtil.throwOnNull;
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.StreamSupport.stream;
@@ -70,27 +71,14 @@ public class D2Strings {
     }
 
     public static String get(int id) {
-        String key = KEYS.get(id);
-        if (key == null) {
-            throw new D2DataException("Unknown string ID: " + id);
-        }
-        return VALUES.get(key);
+        return get(throwOnNull(KEYS.get(id), () -> new D2DataException("Unknown string ID: " + id)));
     }
 
     public static String get(String key) {
-        String value = VALUES.get(key);
-        if (value == null) {
-            throw new D2DataException("Unknown string key: " + key);
-        }
-        return value;
+        return throwOnNull(VALUES.get(key), () -> new D2DataException("Unknown string key: " + key));
     }
 
     public static Integer id(String key) {
-        Integer id = KEYS.inverse().get(key);
-        if (id == null) {
-            throw new D2DataException("Unknown string key: " + key);
-        }
-
-        return id;
+        return throwOnNull(KEYS.inverse().get(key), () -> new D2DataException("Unknown string key: " + key));
     }
 }
