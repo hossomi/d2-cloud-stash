@@ -31,7 +31,8 @@ public class D2Strings {
         Streams
                 .concat(
                         readStringsFile("/data/local/skills.json"),
-                        readStringsFile("/data/local/mercenaries.json"))
+                        readStringsFile("/data/local/mercenaries.json"),
+                        readStringsFile("/data/local/quests.json"))
                 .forEach(node -> put(
                         node.get("id").intValue(),
                         node.get("Key").textValue(),

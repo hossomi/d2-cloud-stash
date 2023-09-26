@@ -1,9 +1,9 @@
 package br.com.yomigae.cloudstash.core.io;
 
-import br.com.yomigae.cloudstash.core.util.ByteUtils;
+import br.com.yomigae.cloudstash.core.parser.D2DataException;
+import com.google.common.primitives.Bytes;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.util.HexFormat;
 
 import static br.com.yomigae.cloudstash.core.util.ByteUtils.flipBytes;
 import static java.lang.Math.ceilDiv;
@@ -12,16 +12,11 @@ import static java.lang.String.format;
 
 public class D2BinaryReader {
     static final int SIZEOF_INT = 4;
-
     private final byte[] data;
-    private final ByteBuffer intBuffer = ByteBuffer.allocate(SIZEOF_INT);
-    private final ByteBuffer charBuffer = ByteBuffer.allocate(64);
-
     private int bit = 0;
 
     public D2BinaryReader(byte[] data) {
         this.data = data;
-        intBuffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
     public int checksum(int checksumAddress) {
@@ -92,6 +87,16 @@ public class D2BinaryReader {
 
     public D2BinaryReader skipBytes(int bytes) {
         return skip(bytes * 8);
+    }
+
+    public D2BinaryReader find(byte[] target) {
+        int index = Bytes.indexOf(this.data, target);
+        if (index == -1) {
+            throw new D2DataException(format(
+                    "Could not find 0x%s in data",
+                    HexFormat.of().formatHex(target)));
+        }
+        return setBytePos(index);
     }
 
     public long read(int bits) {
@@ -170,7 +175,7 @@ public class D2BinaryReader {
 
         for (int i = 0; i < size; i++) {
             char c = (char) readByte();
-            if (c == 0) break;
+            if (c == 0) {break;}
             string.append(c);
         }
 

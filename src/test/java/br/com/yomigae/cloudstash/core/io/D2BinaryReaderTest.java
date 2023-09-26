@@ -1,5 +1,6 @@
 package br.com.yomigae.cloudstash.core.io;
 
+import br.com.yomigae.cloudstash.core.parser.D2DataException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,8 +50,20 @@ class D2BinaryReaderTest {
     }
 
     @Test
-    void setCursorWorks() {
+    void setBytePos() {
         assertThat(reader.setBytePos(10).readByte()).isEqualTo((byte) 0x64);
+    }
+
+    @Test
+    void findWorks() {
+        reader.find(new byte[]{0x77, 0x6F});
+        assertThat(reader.bytePos()).isEqualTo(6);
+    }
+
+    @Test
+    void findThrowsIfNotFound() {
+        assertThatThrownBy(() -> reader.find(new byte[]{0x12, 0x34, 0x56}))
+                .isInstanceOf(D2DataException.class);
     }
 
     @Test

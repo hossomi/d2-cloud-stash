@@ -6,17 +6,6 @@ public enum HirelingClass {
     IRON_WOLF,
     BARBARIAN;
 
-    private static final HirelingClass[] VALUES = values();
-
-    public static HirelingClass fromIndex(int index) {
-        if (index < 0 || index >= values().length) {
-            throw new IllegalArgumentException(String.format(
-                    "Invalid HirelingClass index (%d-%d): %d",
-                    0, VALUES.length, index));
-        }
-        return VALUES[index];
-    }
-
     public static HirelingClass fromName(String name) {
         return switch (name) {
             case "Rogue Scout" -> ROGUE_SCOUT;

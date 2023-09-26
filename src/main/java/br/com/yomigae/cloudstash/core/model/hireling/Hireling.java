@@ -8,7 +8,6 @@ import lombok.Builder;
 
 import static br.com.yomigae.cloudstash.core.model.Attribute.EXPERIENCE_NEXT_LEVEL;
 
-@Builder
 public record Hireling(
         HirelingType type,
         String name,
@@ -16,7 +15,8 @@ public record Hireling(
         int experience)
         implements HasAttributes, HasSkills {
 
-    public Hireling(boolean dead, int nameId, HirelingType type, int experience) {
+    @Builder
+    public Hireling(HirelingType type, int nameId, boolean dead, int experience) {
         this(type, type.names().get(nameId), dead, experience);
     }
 

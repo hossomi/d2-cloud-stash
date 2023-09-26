@@ -1,8 +1,8 @@
 package br.com.yomigae.cloudstash.core.parser;
 
 import br.com.yomigae.cloudstash.core.io.D2BinaryReader;
-import br.com.yomigae.cloudstash.core.model.Character;
-import br.com.yomigae.cloudstash.core.model.Character.CharacterBuilder;
+import br.com.yomigae.cloudstash.core.model.character.Character;
+import br.com.yomigae.cloudstash.core.model.character.Character.CharacterBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;

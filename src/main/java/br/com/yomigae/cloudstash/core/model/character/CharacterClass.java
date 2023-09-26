@@ -1,4 +1,4 @@
-package br.com.yomigae.cloudstash.core.model;
+package br.com.yomigae.cloudstash.core.model.character;
 
 public enum CharacterClass {
     AMAZON,
@@ -9,14 +9,12 @@ public enum CharacterClass {
     DRUID,
     ASSASSIN;
 
-    private static final CharacterClass[] VALUES = values();
-
     public static CharacterClass fromIndex(int index) {
         if (index < 0 || index >= values().length) {
             throw new IllegalArgumentException(String.format(
                     "Invalid CharacterClass index (%d-%d): %d",
-                    0, VALUES.length, index));
+                    0, values().length, index));
         }
-        return VALUES[index];
+        return values()[index];
     }
 }

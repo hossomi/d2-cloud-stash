@@ -18,4 +18,9 @@ public record Act(Difficulty difficulty, int act) {
                 Difficulty.fromIndex(floorDiv(act, ACTS_PER_DIFFICULTY)),
                 floorMod(act, ACTS_PER_DIFFICULTY));
     }
+
+    @Override
+    public String toString() {
+        return "Act %d %s".formatted(act, difficulty);
+    }
 }
