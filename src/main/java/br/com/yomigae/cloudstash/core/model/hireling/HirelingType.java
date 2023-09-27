@@ -46,7 +46,7 @@ public record HirelingType(
                     return HirelingType.builder()
                             .id(sample.getInt("Id"))
                             .klass(HirelingClass.fromName(sample.get("Hireling")))
-                            .act(new Act(
+                            .act(Act.from(
                                     Difficulty.fromIndex(sample.getInt("Difficulty") - 1),
                                     sample.getInt("Act") - 1))
                             .expansion(sample.getInt("Version") > 0)

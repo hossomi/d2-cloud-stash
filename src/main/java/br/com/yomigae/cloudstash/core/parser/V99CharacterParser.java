@@ -35,7 +35,7 @@ public class V99CharacterParser extends VersionCharacterParser {
                 .hardcore((flags & 0x04) > 0);
 
         character
-                .currentAct(Act.fromAbsoluteAct(reader.readByte()))
+                .currentAct(Act.fromIndex(reader.readByte()))
                 .klass(CharacterClass.fromIndex(reader.skipBytes(2).readByte()))
                 .level(reader.skipBytes(2).readByte())
                 .lastPlayed(Instant.ofEpochSecond(reader.skipBytes(4).readInt()));

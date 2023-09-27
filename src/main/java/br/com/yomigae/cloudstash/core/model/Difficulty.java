@@ -1,16 +1,26 @@
 package br.com.yomigae.cloudstash.core.model;
 
-public enum Difficulty {
-    NORMAL, NIGHTMARE, HELL;
+import lombok.AllArgsConstructor;
 
-    private static final Difficulty[] VALUES = values();
+@AllArgsConstructor
+public enum Difficulty {
+    NORMAL("Normal"),
+    NIGHTMARE("Nightmare"),
+    HELL("Hell");
+
+    private final String name;
 
     public static Difficulty fromIndex(int index) {
         if (index < 0 || index >= values().length) {
             throw new IllegalArgumentException(String.format(
                     "Invalid Difficulty index (%d-%d): %d",
-                    0, VALUES.length - 1, index));
+                    0, values().length - 1, index));
         }
-        return VALUES[index];
+        return values()[index];
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
