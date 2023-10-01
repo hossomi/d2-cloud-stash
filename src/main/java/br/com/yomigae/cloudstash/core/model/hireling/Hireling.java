@@ -6,7 +6,9 @@ import br.com.yomigae.cloudstash.core.model.HasSkills;
 import br.com.yomigae.cloudstash.core.model.Skill;
 import lombok.Builder;
 
-import static br.com.yomigae.cloudstash.core.model.Attribute.EXPERIENCE_NEXT_LEVEL;
+import static br.com.yomigae.cloudstash.core.model.Attribute.EXPERIENCE_REQUIRED;
+import static br.com.yomigae.cloudstash.core.util.StringUtils.checkbox;
+import static br.com.yomigae.cloudstash.core.util.StringUtils.list;
 
 public record Hireling(
         HirelingType type,
@@ -21,7 +23,7 @@ public record Hireling(
     }
 
     public int level() {
-        return type.attribute(EXPERIENCE_NEXT_LEVEL).unapply(experience);
+        return type.attribute(EXPERIENCE_REQUIRED).unapply(experience);
     }
 
     @Override
@@ -36,6 +38,18 @@ public record Hireling(
 
     @Override
     public String toString() {
-        return "%s (level %d %s)".formatted(name, level(), type.klass());
+        return new StringBuilder()
+                .append(name)
+                .append(" (level ").append(level()).append(" ").append(type.klass())
+                .append(")\n").append(checkbox("Dead", dead))
+
+                .append("\n\n").append(list("Skills", type.skills().keySet().stream()
+                        .map(skill -> "(%d) %s".formatted(skillLevel(skill), skill))
+                        .toList()))
+
+                .append("\n\n").append(list("Attributes", type.attributes().keySet().stream()
+                        .map(attribute -> "%s: %s".formatted(attribute.label(), attribute.format(attribute(attribute))))
+                        .toList()))
+                .toString();
     }
 }

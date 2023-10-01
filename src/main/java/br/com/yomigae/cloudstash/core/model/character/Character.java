@@ -9,6 +9,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import static br.com.yomigae.cloudstash.core.util.StringUtils.Divider.SINGLE;
+import static br.com.yomigae.cloudstash.core.util.StringUtils.checkbox;
+import static br.com.yomigae.cloudstash.core.util.StringUtils.divider;
+
 @Builder
 public record Character(
         String name,
@@ -26,73 +30,54 @@ public record Character(
         List<Skill> skillHotkeys,
 
         Hireling hireling,
-        Map<Difficulty, Quests> quests) {
+        Map<Difficulty, Progression> progression) {
 
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder();
         string.append(name)
-                .append(" (Level ").append(level)
-                .append(" ").append(klass)
-                .append(")\n");
-        appendBoolean("Expansion", expansion, string).append(" ");
-        appendBoolean("Ladder", ladder, string).append(" ");
-        appendBoolean("Dead", dead, string).append("\n");
-        string
-                .append("Current act: ").append(currentAct).append("\n")
-                .append("Last played: ").append(lastPlayed).append("\n");
+                .append(" (level ").append(level).append(" ").append(klass)
+                .append(")\n").append(checkbox("Expansion", expansion))
+                .append(" ").append(checkbox("Ladder", ladder))
+                .append(" ").append(checkbox("Dead", dead))
 
-        string.append("\nQUESTS\n====================\n");
-        quests.forEach((d, qs) -> string.append(d)
-                .append("\n--------------------\n")
-                .append(qs));
+                .append("\n").append("Current act: ").append(currentAct)
+                .append("\n").append("Last played: ").append(lastPlayed);
+
+        progression.forEach((difficulty, quests) -> string
+                .append("\n\n").append(difficulty)
+                .append("\n").append(divider(SINGLE))
+                .append(quests));
+
+        string
+                .append("\n\n").append(hireling);
         return string.toString();
     }
 
-    private static StringBuilder appendBoolean(String label, boolean value, StringBuilder string) {
-        return string
-                .append("[")
-                .append(value ? "x" : " ")
-                .append("] ")
-                .append(label);
+    public Progression progression(Difficulty difficulty) {
+        return progression.get(difficulty);
     }
 
     @Builder
-    public record Quests(
-            Act1QuestStatus act1,
-            Act2QuestStatus act2,
-            Act3QuestStatus act3,
-            Act4QuestStatus act4,
-            Act5QuestStatus act5) {
+    public record Progression(
+            Act1Status act1,
+            Act2Status act2,
+            Act3Status act3,
+            Act4Status act4,
+            Act5Status act5) {
 
-        List<ActQuestStatus> acts() {
+        List<ActStatus> acts() {
             return List.of(act1, act2, act3, act4, act5);
         }
 
-        ActQuestStatus act(int a) {
+        ActStatus act(int a) {
             return acts().get(a);
         }
 
         @Override
         public String toString() {
             StringBuilder string = new StringBuilder();
-            for (int a = 0; a < acts().size(); a++) {
-                ActQuestStatus act = act(a);
-                string.append("[")
-                        .append(act.visited() ? "v" : " ")
-                        .append(act.introduced() ? "i" : " ")
-                        .append("] Act ")
-                        .append(a + 1)
-                        .append("\n");
-                for (int q = 0; q < act.quests().size(); q++) {
-                    QuestStatus quest = act.quest(q);
-                    string.append("- [")
-                            .append(quest.completed() ? "x" : " ")
-                            .append("] ")
-                            .append(Quest.forAct(a, q).label())
-                            .append("\n");
-                }
-            }
+            acts().forEach(act -> string.append("\n\n").append(act));
             return string.toString();
         }
     }

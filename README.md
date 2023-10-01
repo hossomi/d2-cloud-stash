@@ -61,35 +61,51 @@ Describes the status of all quests in the game, as well as some NPC introduction
 
 #### Difficulty Quests
 
-Each quest data is contained in a `short`. Each bit represents different milestones for each quest, which depends on the
-quests themselves.
+For each act, this structure describes if the player has travelled to the act, introduced to the main NPC and each quest
+status. Note that the quest order may not be the same as in game.
 
-| Address | Type       | Description                        |
-|---------|------------|------------------------------------|
-| `0x00`  | `short`    | `1` if introduced to Warriv        |
-| `0x02`  | `short[6]` | Act 1 quests                       |
-| `0x0E`  | `short`    | `1` if travelled to Act 2          |
-| `0x10`  | `short`    | `1` if introduced to Jerhyn        |
-| `0x12`  | `short[6]` | Act 2 quests                       |
-| `0x1E`  | `short`    | `1` if travelled to Act 3          |
-| `0x20`  | `short`    | `1` if introduced to Hratli        |
-| `0x22`  | `short[6]` | Act 3 quests                       |
-| `0x2E`  | `short`    | `1` if travelled to Act 4          |
-| `0x30`  | `short`    | `1` if travelled to Act 4 (again?) |
-| `0x32`  | `short[3]` | Act 4 quests (last 3 are empty)    |
-| `0x38`  | 6          | Empty slots for act 4 quests       |
-| `0x4E`  | `short`    | `1` if travelled to Act 5          |
-| `0x50`  | `short`    | `1` if introduced to Cain in Act 5 |
-| `0x52`  | 4          | ?                                  |
-| `0x56`  | `short[6]` | Act 5 quests                       |
-| `0x62`  | 14         | ?                                  |
+Each quest data is contained in a `short`, individual bits representing milestones that are specific to the quest. The
+only common milestone is the bit `0x0001` which marks the quest completion. See further below for details.
 
-#### Quest Bits
+| Address | Type       | Description                                          |
+|---------|------------|------------------------------------------------------|
+| `0x00`  | `short`    | `1` if introduced to Warriv                          |
+| `0x02`  | `short`    | Act 1.1: Den of Evil                                 |
+| `0x04`  | `short`    | Act 1.2: Sister's Burial Grounds                     |
+| `0x06`  | `short`    | Act 1.5: Tools of the Trade                          |
+| `0x08`  | `short`    | Act 1.3: The Search for Cain                         |
+| `0x0A`  | `short`    | Act 1.4: The Forgotten Tower                         |
+| `0x0C`  | `short`    | Act 1.6: Sisters to the Slaughter                    |
+| `0x0E`  | `short`    | `1` if travelled to Act 2                            |
+| `0x10`  | `short`    | `1` if introduced to Jerhyn                          |
+| `0x12`  | `short`    | Act 2.1: Radament's Lair                             |
+| `0x14`  | `short`    | Act 2.2: The Hodradric Staff                         |
+| `0x16`  | `short`    | Act 2.3: Tainted Sun                                 |
+| `0x18`  | `short`    | Act 2.4: Arcane Sanctuary                            |
+| `0x1A`  | `short`    | Act 2.5: The Summoner                                |
+| `0x1C`  | `short`    | Act 2.6: The Seven Tombs                             |
+| `0x1E`  | `short`    | `1` if travelled to Act 3                            |
+| `0x20`  | `short`    | `1` if introduced to Hratli                          |
+| `0x22`  | `short`    | Act 3.4: Lam Esen's Tome                             |
+| `0x24`  | `short`    | Act 3.3: Khalim's Will                               |
+| `0x26`  | `short`    | Act 3.2: Blade of the Old Religion                   |
+| `0x28`  | `short`    | Act 3.1: The Golden Bird                             |
+| `0x2A`  | `short`    | Act 3.5: The Blackened Temple                        |
+| `0x2C`  | `short`    | Act 3.6: The Guardian                                |
+| `0x2E`  | `short`    | `1` if travelled to Act 4                            |
+| `0x30`  | `short`    | `1` if introduced to Act 4 (true if travelled)       |
+| `0x32`  | `short`    | Act 4.1: The Fallen Angel                            |
+| `0x34`  | `short`    | Act 4.2: Hell's Forge                                |
+| `0x36`  | `short`    | Act 4.3: Terror's End                                |
+| `0x38`  | `short[3]` | Empty (Act 4 has only 3 quests)                      |
+| `0x4E`  | `short`    | `1` if travelled to Act 5                            |
+| `0x50`  | `short`    | `1` if introduced to Cain in Act 5                   |
+| `0x52`  | 4          | ?                                                    |
+| `0x56`  | `short`    | Act 5.1: Siege on Harrogath                          |
+| `0x58`  | `short`    | Act 5.2: Rescue on Mountain Arreat                   |
+| `0x5A`  | `short`    | Act 5.3: Prison of Ice:<br/>`0x0080` Scroll consumed |
+| `0x5C`  | `short`    | Act 5.4: Betrayal of Harrogath                       |
+| `0x5E`  | `short`    | Act 5.5: Rite of Passage                             |
+| `0x60`  | `short`    | Act 5.6: Eve of Destruction                          |
+| `0x62`  | 14         | ?                                                    |
 
-For all quests, the first bit marks its completion. All other bits depends on the quest. For now, the only important
-quest is Prison of Ice, which increases the character resistances if the Scroll of Resistance was consumed.
-
-| Quest         | Description               |
-|---------------|---------------------------|
-| All           | `0x1000` `0` if completed |
-| Prison of Ice | `0x0200` Scroll consumed  |

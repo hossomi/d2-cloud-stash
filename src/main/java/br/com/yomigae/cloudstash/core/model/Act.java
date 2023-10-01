@@ -1,5 +1,7 @@
 package br.com.yomigae.cloudstash.core.model;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 
 import static br.com.yomigae.cloudstash.core.model.Difficulty.*;
@@ -9,6 +11,7 @@ import static java.lang.Math.floorDiv;
 import static java.lang.Math.floorMod;
 import static java.lang.String.format;
 
+@Getter
 public enum Act {
     ACT1_NORMAL(NORMAL, 0),
     ACT2_NORMAL(NORMAL, 1),
@@ -53,6 +56,6 @@ public enum Act {
 
     @Override
     public String toString() {
-        return format("Act %d %s", number, difficulty);
+        return format("Act %d %s", number + 1, difficulty);
     }
 }

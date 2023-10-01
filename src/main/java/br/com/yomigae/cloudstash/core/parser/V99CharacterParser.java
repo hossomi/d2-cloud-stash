@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static br.com.yomigae.cloudstash.core.model.quest.Quest.*;
+
 public class V99CharacterParser extends VersionCharacterParser {
 
     public V99CharacterParser() {
@@ -63,61 +65,66 @@ public class V99CharacterParser extends VersionCharacterParser {
                         .build());
 
         reader.find("Woo!".getBytes()).skipBytes(10);
-        character.quests(parseQuests(reader));
+        character.progression(parseProgression(reader));
     }
 
-    private Map<Difficulty, Character.Quests> parseQuests(D2BinaryReader reader) {
-        return Maps.toMap(List.of(Difficulty.values()), x -> {
-            var quests = Character.Quests.builder()
-                    .act1(Act1QuestStatus.builder()
+    private Map<Difficulty, Character.Progression> parseProgression(D2BinaryReader reader) {
+        return Maps.toMap(List.of(Difficulty.values()), difficulty -> {
+            Character.Progression.ProgressionBuilder quests = Character.Progression.builder()
+                    .act1(Act1Status.builder()
+                            .difficulty(difficulty)
                             .visited(true)
                             .introduced(reader.readShort() > 0)
-                            .denOfEvil(parseGenericQuest(reader))
-                            .sistersBurialGrounds(parseGenericQuest(reader))
-                            .toolsOfTheTrade(parseGenericQuest(reader))
-                            .theSearchForCain(parseGenericQuest(reader))
-                            .theForgottenTower(parseGenericQuest(reader))
-                            .sistersToTheSlaughter(parseGenericQuest(reader))
+                            .denOfEvil(parseGenericQuest(DEN_OF_EVIL, reader))
+                            .sistersBurialGrounds(parseGenericQuest(SISTERS_BURIAL_GROUNDS, reader))
+                            .toolsOfTheTrade(parseGenericQuest(TOOLS_OF_THE_TRADE, reader))
+                            .theSearchForCain(parseGenericQuest(THE_SEARCH_FOR_CAIN, reader))
+                            .theForgottenTower(parseGenericQuest(THE_FORGOTTEN_TOWER, reader))
+                            .sistersToTheSlaughter(parseGenericQuest(SISTERS_TO_THE_SLAUGHTER, reader))
                             .build())
-                    .act2(Act2QuestStatus.builder()
+                    .act2(Act2Status.builder()
+                            .difficulty(difficulty)
                             .visited(reader.readShort() > 0)
                             .introduced(reader.readShort() > 0)
-                            .radamentsLair(parseGenericQuest(reader))
-                            .theHoradricStaff(parseGenericQuest(reader))
-                            .taintedSun(parseGenericQuest(reader))
-                            .arcaneSanctuary(parseGenericQuest(reader))
-                            .theSummoner(parseGenericQuest(reader))
-                            .theSevenTombs(parseGenericQuest(reader))
+                            .radamentsLair(parseGenericQuest(RADAMENTS_LAIR, reader))
+                            .theHoradricStaff(parseGenericQuest(THE_HORADRIC_STAFF, reader))
+                            .taintedSun(parseGenericQuest(TAINTED_SUN, reader))
+                            .arcaneSanctuary(parseGenericQuest(ARCANE_SANCTUARY, reader))
+                            .theSummoner(parseGenericQuest(THE_SUMMONER, reader))
+                            .theSevenTombs(parseGenericQuest(THE_SEVEN_TOMBS, reader))
                             .build())
-                    .act3(Act3QuestStatus.builder()
+                    .act3(Act3Status.builder()
+                            .difficulty(difficulty)
                             .visited(reader.readShort() > 0)
                             .introduced(reader.readShort() > 0)
-                            .lamEsensTome(parseGenericQuest(reader))
-                            .khalimsWill(parseGenericQuest(reader))
-                            .bladeOfTheOldReligion(parseGenericQuest(reader))
-                            .theGoldenBird(parseGenericQuest(reader))
-                            .theBlackenedTemple(parseGenericQuest(reader))
-                            .theGuardian(parseGenericQuest(reader))
+                            .lamEsensTome(parseGenericQuest(LAM_ESENS_TOME, reader))
+                            .khalimsWill(parseGenericQuest(KHALIMS_WILL, reader))
+                            .bladeOfTheOldReligion(parseGenericQuest(BLADE_OF_THE_OLD_RELIGION, reader))
+                            .theGoldenBird(parseGenericQuest(THE_GOLDEN_BIRD, reader))
+                            .theBlackenedTemple(parseGenericQuest(THE_BLACKENED_TEMPLE, reader))
+                            .theGuardian(parseGenericQuest(THE_GUARDIAN, reader))
                             .build())
-                    .act4(Act4QuestStatus.builder()
+                    .act4(Act4Status.builder()
+                            .difficulty(difficulty)
                             .visited(reader.readShort() > 0)
                             .introduced(reader.readShort() > 0)
-                            .theFallenAngel(parseGenericQuest(reader))
-                            .hellsForge(parseGenericQuest(reader))
-                            .terrorsEnd(parseGenericQuest(reader))
+                            .theFallenAngel(parseGenericQuest(THE_FALLEN_ANGEL, reader))
+                            .hellsForge(parseGenericQuest(HELLS_FORGE, reader))
+                            .terrorsEnd(parseGenericQuest(TERRORS_END, reader))
                             .build())
-                    .act5(Act5QuestStatus.builder()
+                    .act5(Act5Status.builder()
+                            .difficulty(difficulty)
                             .visited(reader.skipBytes(6).readShort() > 0)
                             .introduced(reader.readShort() > 0)
-                            .siegeOnHarrogath(parseGenericQuest(reader.skipBytes(4)))
-                            .rescueOnMountainArreat(parseGenericQuest(reader))
+                            .siegeOnHarrogath(parseGenericQuest(SIEGE_ON_HARROGATH, reader.skipBytes(4)))
+                            .rescueOnMountainArreat(parseGenericQuest(RESCUE_ON_MOUNTAIN_ARREAT, reader))
                             .prisonOfIce(with(reader.readShort(), q -> QuestStatus.PrisonOfIce.builder()
                                     .completed((q & 0x0001) > 0)
                                     .scrollConsumed((q & 0x0040) > 0))
                                     .build())
-                            .betrayalOfHarrogath(parseGenericQuest(reader))
-                            .riteOfPassage(parseGenericQuest(reader))
-                            .eveOfDestruction(parseGenericQuest(reader))
+                            .betrayalOfHarrogath(parseGenericQuest(BETRAYAL_OF_HARROGATH, reader))
+                            .riteOfPassage(parseGenericQuest(RITE_OF_PASSAGE, reader))
+                            .eveOfDestruction(parseGenericQuest(EVE_OF_DESTRUCTION, reader))
                             .build());
 
             reader.skipBytes(14);
@@ -125,8 +132,8 @@ public class V99CharacterParser extends VersionCharacterParser {
         });
     }
 
-    private static QuestStatus.Generic parseGenericQuest(D2BinaryReader reader) {
-        return new QuestStatus.Generic((reader.readShort() & 0x0001) == 1);
+    private static QuestStatus.Generic parseGenericQuest(Quest quest, D2BinaryReader reader) {
+        return new QuestStatus.Generic(quest, (reader.readShort() & 0x0001) == 1);
     }
 
     public static <T, R> R with(T in, Function<T, R> mapper) {

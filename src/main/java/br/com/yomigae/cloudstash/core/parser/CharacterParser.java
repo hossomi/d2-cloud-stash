@@ -6,7 +6,6 @@ import br.com.yomigae.cloudstash.core.model.character.Character.CharacterBuilder
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.Function;
 
 import static java.lang.String.format;
 
@@ -56,12 +55,4 @@ public abstract class CharacterParser {
     protected abstract void checkVersion(int version);
 
     protected abstract void parseHeader(D2BinaryReader reader, CharacterBuilder character);
-
-    protected static <T, R> R mapOrThrow(T value, Function<T, R> mapper, String errorMessage) {
-        try {
-            return mapper.apply(value);
-        } catch (Exception e) {
-            throw new D2ParserException(format("%s: %s", errorMessage, value));
-        }
-    }
 }

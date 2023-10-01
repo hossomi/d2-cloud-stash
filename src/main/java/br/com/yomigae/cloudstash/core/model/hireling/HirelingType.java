@@ -71,10 +71,10 @@ public record HirelingType(
                                     row.getInt("Def/Lvl"))))
                             .attribute(STRENGTH, toBreakpointScaling(rows, row -> new Scaling.Linear(
                                     row.getInt("Str"),
-                                    row.getInt("Str/Lvl"))))
+                                    row.getDouble("Str/Lvl") / 8)))
                             .attribute(DEXTERITY, toBreakpointScaling(rows, row -> new Scaling.Linear(
                                     row.getInt("Dex"),
-                                    row.getInt("Dex/Lvl"))))
+                                    row.getDouble("Dex/Lvl") / 8)))
                             .attribute(ATTACK_RATING, toBreakpointScaling(rows, row -> new Scaling.Linear(
                                     row.getInt("AR"),
                                     row.getInt("AR/Lvl"))))
@@ -86,17 +86,17 @@ public record HirelingType(
                                     row.getDouble("Dmg/Lvl") / 8)))
                             .attribute(FIRE_RESISTANCE, toBreakpointScaling(rows, row -> new Scaling.Linear(
                                     row.getInt("ResistFire"),
-                                    row.getDouble("ResistFire/Lvl") / 8)))
+                                    row.getDouble("ResistFire/Lvl") / 4)))
                             .attribute(COLD_RESISTANCE, toBreakpointScaling(rows, row -> new Scaling.Linear(
                                     row.getInt("ResistCold"),
-                                    row.getDouble("ResistCold/Lvl") / 8)))
+                                    row.getDouble("ResistCold/Lvl") / 4)))
                             .attribute(LIGHTNING_RESISTANCE, toBreakpointScaling(rows, row -> new Scaling.Linear(
                                     row.getInt("ResistLightning"),
-                                    row.getDouble("ResistLightning/Lvl") / 8)))
+                                    row.getDouble("ResistLightning/Lvl") / 4)))
                             .attribute(POISON_RESISTANCE, toBreakpointScaling(rows, row -> new Scaling.Linear(
                                     row.getInt("ResistPoison"),
-                                    row.getDouble("ResistPoison/Lvl") / 8)))
-                            .attribute(EXPERIENCE_NEXT_LEVEL, new Scaling.Breakpoint(toBreakpointMap(rows,
+                                    row.getDouble("ResistPoison/Lvl") / 4)))
+                            .attribute(EXPERIENCE_REQUIRED, new Scaling.Breakpoint(toBreakpointMap(rows,
                                     row -> new Scaling.Experience(row.getInt("Level"), row.getInt("Exp/Lvl")))))
                             .build();
                 })
