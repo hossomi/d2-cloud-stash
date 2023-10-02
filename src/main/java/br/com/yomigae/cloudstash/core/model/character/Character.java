@@ -2,7 +2,7 @@ package br.com.yomigae.cloudstash.core.model.character;
 
 import br.com.yomigae.cloudstash.core.model.*;
 import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
-import br.com.yomigae.cloudstash.core.model.quest.*;
+import br.com.yomigae.cloudstash.core.model.progression.*;
 import lombok.Builder;
 
 import java.time.Instant;
@@ -66,11 +66,11 @@ public record Character(
             Act4Status act4,
             Act5Status act5) {
 
-        List<ActStatus> acts() {
+        List<ActStatus<?, ?>> acts() {
             return List.of(act1, act2, act3, act4, act5);
         }
 
-        ActStatus act(int a) {
+        ActStatus<?, ?> act(int a) {
             return acts().get(a);
         }
 

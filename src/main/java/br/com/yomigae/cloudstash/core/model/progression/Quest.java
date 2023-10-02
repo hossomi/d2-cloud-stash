@@ -1,4 +1,4 @@
-package br.com.yomigae.cloudstash.core.model.quest;
+package br.com.yomigae.cloudstash.core.model.progression;
 
 import br.com.yomigae.cloudstash.core.io.D2Strings;
 import lombok.Getter;

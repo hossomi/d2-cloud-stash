@@ -8,56 +8,56 @@ The save file contains all the character current state.
 
 The header is a fixed-size section with file metadata and basic character state.
 
-| Address  | Type                    | Description                                                                                                                                     |
-|----------|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| `0x0000` | `int`                   | Signature (0x55AA55AA)                                                                                                                          | 
-| `0x0004` | `int`                   | Version (99)                                                                                                                                    | 
-| `0x0008` | `int`                   | File size                                                                                                                                       | 
-| `0x000C` | `int`                   | Checksum                                                                                                                                        | 
-| `0x0010` | `int`                   | **Active equipment:**<br/>`0` Main<br/>`1` Swap                                                                                                 |
-| `0x0014` | 16                      | ?                                                                                                                                               |
-| `0x0024` | `byte`                  | **Character flags:**<br/>`0x40` Ladder<br/>`0x20` Expansion<br/>`0x08` Dead<br/>`0x04` Hardcore                                                 | 
-| `0x0025` | `byte`                  | **Character progression:** incremented for each act boss killed; determines the character title                                                 |
-| `0x0026` | 2                       | ?                                                                                                                                               |                                                                                                                                                              
-| `0x0028` | `byte`                  | **Character class:**<br/>`0` Amazon<br/>`1` Sorceress<br/>`2` Necromancer<br/>`3` Paladin<br/>`4` Barbarian<br/>`5` Druid<br/>`6` Assassin<br/> |
-| `0x0029` | 2                       | ?                                                                                                                                               |                                                                                                                                                              
-| `0x002B` | `byte`                  | Character level                                                                                                                                 |
-| `0x002C` | 4                       | ?                                                                                                                                               | 
-| `0x0030` | `int`                   | Last played (epoch seconds)                                                                                                                     | 
-| `0x0034` | 4                       | ?                                                                                                                                               | 
-| `0x0038` | `int[16]`               | Skills assigned to the "Skill #" hotkeys from the game control settings; if no skill is assigned, the corresponding value is `-1`               | 
-| `0x0078` | `int`                   | Left mouse button skill (main equipment)                                                                                                        | 
-| `0x007C` | `int`                   | Right mouse button skill (main equipment)                                                                                                       | 
-| `0x0080` | `int`                   | Left mouse button skill (swap equipment)                                                                                                        | 
-| `0x0084` | `int`                   | Right mouse button skill (swap equipment)                                                                                                       | 
-| `0x0088` | 32                      | Character menu appearance (?)                                                                                                                   |
-| `0x00A8` | `byte[3]`               | **Difficulty status** (Normal, Nightmare and Hell):<br/>`0x80` Unlocked<br/>`0x78` ?<br/>`0x07` Current act (0-4)                               |
-| `0x00AB` | `int`                   | Map ID (?)                                                                                                                                      |
-| `0x00AF` | 2                       | ?                                                                                                                                               |
-| `0x00B1` | `short`                 | Mercenary dead                                                                                                                                  |
-| `0x00B3` | `int`                   | Mercenary seed (?)                                                                                                                              |
-| `0x00B7` | `short`                 | Mercenary name ID                                                                                                                               |
-| `0x00B9` | `short`                 | Mercenary type                                                                                                                                  |
-| `0x00BB` | `int`                   | Mercenary experience                                                                                                                            |
-| `0x00BF` | 74                      | ?                                                                                                                                               |
-| `0x010B` | `char[16]`              | Character name                                                                                                                                  |
-| `0x011B` | 51                      | ?                                                                                                                                               |
-| `0x014F` | [Quests](#quests) (298) | Quests status                                                                                                                                   |
-| `0x0279` | Waypoints (81)          | Waypoints status                                                                                                                                |
-| `0x02CA` | NPCs (51)               | NPCs status                                                                                                                                     |
-| `0x02FD` | Attributes              | Character attributes                                                                                                                            |
-|          | Skills                  | Character skills                                                                                                                                |
-|          | Items                   | Character items                                                                                                                                 |
+| Address  | Type                         | Description                                                                                                                                     |
+|----------|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `0x0000` | `int`                        | Signature (0x55AA55AA)                                                                                                                          | 
+| `0x0004` | `int`                        | Version (99)                                                                                                                                    | 
+| `0x0008` | `int`                        | File size                                                                                                                                       | 
+| `0x000C` | `int`                        | Checksum                                                                                                                                        | 
+| `0x0010` | `int`                        | **Active equipment:**<br/>`0` Main<br/>`1` Swap                                                                                                 |
+| `0x0014` | 16                           | ?                                                                                                                                               |
+| `0x0024` | `byte`                       | **Character flags:**<br/>`0x40` Ladder<br/>`0x20` Expansion<br/>`0x08` Dead<br/>`0x04` Hardcore                                                 | 
+| `0x0025` | `byte`                       | **Character progression:** incremented for each act boss killed; determines the character title                                                 |
+| `0x0026` | 2                            | ?                                                                                                                                               |                                                                                                                                                              
+| `0x0028` | `byte`                       | **Character class:**<br/>`0` Amazon<br/>`1` Sorceress<br/>`2` Necromancer<br/>`3` Paladin<br/>`4` Barbarian<br/>`5` Druid<br/>`6` Assassin<br/> |
+| `0x0029` | 2                            | ?                                                                                                                                               |                                                                                                                                                              
+| `0x002B` | `byte`                       | Character level                                                                                                                                 |
+| `0x002C` | 4                            | ?                                                                                                                                               | 
+| `0x0030` | `int`                        | Last played (epoch seconds)                                                                                                                     | 
+| `0x0034` | 4                            | ?                                                                                                                                               | 
+| `0x0038` | `int[16]`                    | Skills assigned to the "Skill #" hotkeys from the game control settings; if no skill is assigned, the corresponding value is `-1`               | 
+| `0x0078` | `int`                        | Left mouse button skill (main equipment)                                                                                                        | 
+| `0x007C` | `int`                        | Right mouse button skill (main equipment)                                                                                                       | 
+| `0x0080` | `int`                        | Left mouse button skill (swap equipment)                                                                                                        | 
+| `0x0084` | `int`                        | Right mouse button skill (swap equipment)                                                                                                       | 
+| `0x0088` | 32                           | Character menu appearance (?)                                                                                                                   |
+| `0x00A8` | `byte[3]`                    | **Difficulty status** (Normal, Nightmare and Hell):<br/>`0x80` Unlocked<br/>`0x78` ?<br/>`0x07` Current act (0-4)                               |
+| `0x00AB` | `int`                        | Map ID (?)                                                                                                                                      |
+| `0x00AF` | 2                            | ?                                                                                                                                               |
+| `0x00B1` | `short`                      | Mercenary dead                                                                                                                                  |
+| `0x00B3` | `int`                        | Mercenary seed (?)                                                                                                                              |
+| `0x00B7` | `short`                      | Mercenary name ID                                                                                                                               |
+| `0x00B9` | `short`                      | Mercenary type                                                                                                                                  |
+| `0x00BB` | `int`                        | Mercenary experience                                                                                                                            |
+| `0x00BF` | 74                           | ?                                                                                                                                               |
+| `0x010B` | `char[16]`                   | Character name                                                                                                                                  |
+| `0x011B` | 51                           | ?                                                                                                                                               |
+| `0x014F` | [Quests](#quests) (298)      | Quests status                                                                                                                                   |
+| `0x0279` | [Waypoints](#waypoints) (81) | Waypoints status                                                                                                                                |
+| `0x02CA` | NPCs (51)                    | NPCs status                                                                                                                                     |
+| `0x02FD` | Attributes                   | Character attributes                                                                                                                            |
+|          | Skills                       | Character skills                                                                                                                                |
+|          | Items                        | Character items                                                                                                                                 |
 
 ### Quests
 
 Describes the status of all quests in the game, as well as some NPC introductions and act travelling.
 
-| Address  | Type                                        | Description                                  |
-|----------|---------------------------------------------|----------------------------------------------|
-| `0x014F` | `byte[4]`                                   | `Woo!`                                       |
-| `0x0153` | 6                                           | ?                                            |
-| `0x0159` | [Difficulty Quests](#difficulty-quests) x 3 | Quests status for Normal, Nightmare and Hell |
+| Address | Type                                        | Description                                  |
+|---------|---------------------------------------------|----------------------------------------------|
+| `0x00`  | `byte[4]`                                   | `Woo!`                                       |
+| `0x04`  | 6                                           | ?                                            |
+| `0x0A`  | [Difficulty Quests](#difficulty-quests) x 3 | Quests status for Normal, Nightmare and Hell |
 
 #### Difficulty Quests
 
@@ -98,14 +98,34 @@ only common milestone is the bit `0x0001` which marks the quest completion. See 
 | `0x34`  | `short`    | Act 4.2: Hell's Forge                                |
 | `0x36`  | `short`    | Act 4.3: Terror's End                                |
 | `0x38`  | `short[3]` | Empty (Act 4 has only 3 quests)                      |
-| `0x4E`  | `short`    | `1` if travelled to Act 5                            |
-| `0x50`  | `short`    | `1` if introduced to Cain in Act 5                   |
-| `0x52`  | 4          | ?                                                    |
-| `0x56`  | `short`    | Act 5.1: Siege on Harrogath                          |
-| `0x58`  | `short`    | Act 5.2: Rescue on Mountain Arreat                   |
-| `0x5A`  | `short`    | Act 5.3: Prison of Ice:<br/>`0x0080` Scroll consumed |
-| `0x5C`  | `short`    | Act 5.4: Betrayal of Harrogath                       |
-| `0x5E`  | `short`    | Act 5.5: Rite of Passage                             |
-| `0x60`  | `short`    | Act 5.6: Eve of Destruction                          |
-| `0x62`  | 14         | ?                                                    |
+| `0x3E`  | `short`    | `1` if travelled to Act 5                            |
+| `0x40`  | `short`    | `1` if introduced to Cain in Act 5                   |
+| `0x42`  | 4          | ?                                                    |
+| `0x46`  | `short`    | Act 5.1: Siege on Harrogath                          |
+| `0x48`  | `short`    | Act 5.2: Rescue on Mountain Arreat                   |
+| `0x4A`  | `short`    | Act 5.3: Prison of Ice:<br/>`0x0080` Scroll consumed |
+| `0x4C`  | `short`    | Act 5.4: Betrayal of Harrogath                       |
+| `0x4E`  | `short`    | Act 5.5: Rite of Passage                             |
+| `0x50`  | `short`    | Act 5.6: Eve of Destruction                          |
+| `0x52`  | 14         | ?                                                    |
 
+### Waypoints
+
+Describes the status of all waypoints in the game.
+
+| Address | Type                                              | Description                                    |
+|---------|---------------------------------------------------|------------------------------------------------|
+| `0x00`  | `byte[2]`                                         | `WS`                                           |
+| `0x02`  | 6                                                 | ?                                              |
+| `0x08`  | [Difficulty Waypoints](#difficulty-waypoints) x 3 | Waypoint status for Normal, Nightmare and Hell |
+
+#### Difficulty Waypoints
+
+For each act, this structure describes if the player has activated each waypoint, represented by individual bits in the
+same order as in game. For example, `0x0000000001` is the status for the Rogue Encampment waypoint.
+
+| Address | Type | Description         |
+|---------|------|---------------------|
+| `0x00`  | 2    | ?                   |
+| `0x02`  | 5    | Waypoints activated |
+| `0x07`  | 17   | ?                   |

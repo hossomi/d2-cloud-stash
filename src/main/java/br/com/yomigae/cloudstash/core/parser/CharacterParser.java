@@ -49,6 +49,7 @@ public abstract class CharacterParser {
 
         CharacterBuilder character = Character.builder();
         parseHeader(reader, character);
+        System.out.println("%x".formatted(reader.bytePos()));
         return character.build();
     }
 

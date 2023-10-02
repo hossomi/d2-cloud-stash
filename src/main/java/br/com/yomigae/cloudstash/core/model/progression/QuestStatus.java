@@ -1,10 +1,10 @@
-package br.com.yomigae.cloudstash.core.model.quest;
+package br.com.yomigae.cloudstash.core.model.progression;
 
 import lombok.Builder;
 
 import java.util.List;
 
-import static br.com.yomigae.cloudstash.core.model.quest.Quest.PRISON_OF_ICE;
+import static br.com.yomigae.cloudstash.core.model.progression.Quest.PRISON_OF_ICE;
 import static br.com.yomigae.cloudstash.core.util.StringUtils.checkbox;
 import static br.com.yomigae.cloudstash.core.util.StringUtils.list;
 
