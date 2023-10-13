@@ -3,6 +3,9 @@ package br.com.yomigae.cloudstash.core.model;
 import br.com.yomigae.cloudstash.core.io.D2Strings;
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Getter
 public enum Area {
     ROGUE_ENCAMPMENT("Rogue Encampment", 0, true),
@@ -46,9 +49,9 @@ public enum Area {
     COW_LEVEL("Moo Moo Farm", 0),
 
     LUT_GHOLEIN("Lut Gholein", 1, true),
-    LUT_GHOLEI_SEWERS_LEVEL_1("Sewers Level 1", 1),
-    LUT_GHOLEI_SEWERS_LEVEL_2("Sewers Level 2", 1),
-    LUT_GHOLEI_SEWERS_LEVEL_3("Sewers Level 3", 1),
+    LUT_GHOLEIN_SEWERS_LEVEL_1("Sewers Level 1", 1),
+    LUT_GHOLEIN_SEWERS_LEVEL_2("Sewers Level 2", 1, true),
+    LUT_GHOLEIN_SEWERS_LEVEL_3("Sewers Level 3", 1),
     ROCKY_WASTE("Rocky Waste", 1),
     STONY_TOMB_LEVEL_1("Stony Tomb Level 1", 1),
     STONY_TOMB_LEVEL_2("Stony Tomb Level 2", 1),
@@ -76,7 +79,7 @@ public enum Area {
     DURIELS_LAIR("Duriel's Lair", 1),
 
     KURAST_DOCKS("Kurast Docktown", 2, true),
-    SPIDER_FOREST("Spider Forest", 2),
+    SPIDER_FOREST("Spider Forest", 2, true),
     SPIDER_CAVERN("Spider Cavern", 2),
     GREAT_MARSH("Great Marsh", 2, true),
     FLAYER_JUNGLE("Flayer Jungle", 2, true),
@@ -147,5 +150,10 @@ public enum Area {
         this.label = D2Strings.get(nameKey);
         this.act = act;
         this.waypoint = waypoint;
+    }
+
+    @Override
+    public String toString() {
+        return label;
     }
 }

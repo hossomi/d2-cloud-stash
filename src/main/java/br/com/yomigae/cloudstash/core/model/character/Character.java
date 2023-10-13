@@ -4,10 +4,10 @@ import br.com.yomigae.cloudstash.core.model.*;
 import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
 import br.com.yomigae.cloudstash.core.model.progression.*;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 
 import static br.com.yomigae.cloudstash.core.util.StringUtils.Divider.SINGLE;
 import static br.com.yomigae.cloudstash.core.util.StringUtils.checkbox;
@@ -22,15 +22,15 @@ public record Character(
         boolean hardcore,
 
         int level,
+        @EqualsAndHashCode.Exclude Instant lastPlayed,
         Act currentAct,
-        Instant lastPlayed,
         boolean dead,
         EquipmentSet activeEquipmentSet,
         Swap<Dual<Skill>> mouseSkill,
         List<Skill> skillHotkeys,
 
         Hireling hireling,
-        Map<Difficulty, Progression> progression) {
+        DifficultyMap<Progression> progression) {
 
     @Override
     public String toString() {
@@ -58,19 +58,19 @@ public record Character(
         return progression.get(difficulty);
     }
 
-    @Builder
+    @Builder(builderClassName = "Builder")
     public record Progression(
-            Act1Status act1,
-            Act2Status act2,
-            Act3Status act3,
-            Act4Status act4,
-            Act5Status act5) {
+            Act1Progression act1,
+            Act2Progression act2,
+            Act3Progression act3,
+            Act4Progression act4,
+            Act5Progression act5) {
 
-        List<ActStatus<?, ?>> acts() {
+        List<ActProgression<?, ?>> acts() {
             return List.of(act1, act2, act3, act4, act5);
         }
 
-        ActStatus<?, ?> act(int a) {
+        ActProgression<?, ?> act(int a) {
             return acts().get(a);
         }
 
@@ -79,6 +79,19 @@ public record Character(
             StringBuilder string = new StringBuilder();
             acts().forEach(act -> string.append("\n\n").append(act));
             return string.toString();
+        }
+
+        public static class Builder {
+            public Builder set(ActProgression<?, ?> status) {
+                return switch (status.act().number()) {
+                    case 0 -> act1((Act1Progression) status);
+                    case 1 -> act2((Act2Progression) status);
+                    case 2 -> act3((Act3Progression) status);
+                    case 3 -> act4((Act4Progression) status);
+                    case 4 -> act5((Act5Progression) status);
+                    default -> throw new IllegalArgumentException("Invalid act: " + status.act());
+                };
+            }
         }
     }
 }

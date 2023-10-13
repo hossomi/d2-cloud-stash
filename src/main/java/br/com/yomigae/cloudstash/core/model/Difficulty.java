@@ -30,4 +30,5 @@ public enum Difficulty {
     public String toString() {
         return name;
     }
+
 }

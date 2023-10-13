@@ -121,7 +121,7 @@ Describes the status of all waypoints in the game.
 
 #### Difficulty Waypoints
 
-For each act, this structure describes if the player has activated each waypoint, represented by individual bits in the
+Describes if the player has activated each waypoint in this difficulty, represented by individual bits in the
 same order as in game. For example, `0x0000000001` is the status for the Rogue Encampment waypoint.
 
 | Address | Type | Description         |

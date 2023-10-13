@@ -134,29 +134,6 @@ public class D2BinaryReader {
         return buffer;
     }
 
-    @Deprecated
-    public void read(byte[] buffer) {
-        read(buffer, buffer.length);
-    }
-
-    @Deprecated
-    public void read(byte[] buffer, int size) {
-        if (data.length - bit < size) {
-            throw new D2ReaderException(format(
-                    "End of data reading %d bytes (%d remaining)",
-                    size, data.length - bit));
-        }
-
-        if (buffer.length < size) {
-            throw new D2ReaderException(format(
-                    "Buffer too small (want %d bytes, buffer has %d)",
-                    size, buffer.length));
-        }
-
-        System.arraycopy(data, bit, buffer, 0, size);
-        bit += size;
-    }
-
     public byte readByte() {
         long data = read(8);
         return (byte) (data & 0xFF);

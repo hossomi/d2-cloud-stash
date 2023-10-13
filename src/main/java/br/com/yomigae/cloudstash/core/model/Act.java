@@ -1,8 +1,10 @@
 package br.com.yomigae.cloudstash.core.model;
 
+import com.google.common.collect.Maps;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 
 import static br.com.yomigae.cloudstash.core.model.Difficulty.*;
 import static com.google.common.base.Preconditions.checkElementIndex;
@@ -58,4 +60,5 @@ public enum Act {
     public String toString() {
         return format("Act %d %s", number + 1, difficulty);
     }
+
 }
