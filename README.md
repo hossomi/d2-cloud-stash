@@ -43,9 +43,9 @@ The header is a fixed-size section with file metadata and basic character state.
 | `0x010B` | `char[16]`                   | Character name                                                                                                                                  |
 | `0x011B` | 51                           | ?                                                                                                                                               |
 | `0x014F` | [Quests](#quests) (298)      | Quests status                                                                                                                                   |
-| `0x0279` | [Waypoints](#waypoints) (81) | Waypoints status                                                                                                                                |
+| `0x0279` | [Waypoints](#waypoints) (80) | Waypoints status                                                                                                                                |
 | `0x02CA` | NPCs (51)                    | NPCs status                                                                                                                                     |
-| `0x02FD` | Attributes                   | Character attributes                                                                                                                            |
+| `0x02FC` | Attributes                   | Character attributes                                                                                                                            |
 |          | Skills                       | Character skills                                                                                                                                |
 |          | Items                        | Character items                                                                                                                                 |
 

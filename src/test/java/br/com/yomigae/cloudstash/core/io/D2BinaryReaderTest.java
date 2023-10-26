@@ -8,16 +8,16 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import static br.com.yomigae.cloudstash.core.io.D2BinaryReader.SIZEOF_INT;
 import static br.com.yomigae.cloudstash.core.io.LongBinaryAssert.assertThatBinary;
-import static br.com.yomigae.cloudstash.core.util.Utils.binaryStringToLong;
+import static br.com.yomigae.cloudstash.core.util.Utils.binaryToLong;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class D2BinaryReaderTest {
 
     public static final byte[] DATA = {
-            0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x77, 0x6F, // 01101000 01100101 01101100 01101100 01101111 00100000 01110111 01101111
-            0x72, 0x6C, 0x64, 0x20, 0x6F, 0x66, 0x20, 0x64, // 01100010 01101100 01100100 00100000 01101111 01100110 00100000 01100100
-            0x69, 0x61, 0x62, 0x6C, 0x6F, 0x20, 0x69, 0x69  // 01101001 01100001 01100010 01101100 01101111 00100000 01101001 01101001
+            0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x77, 0x6F,
+            0x72, 0x6C, 0x64, 0x20, 0x6F, 0x66, 0x20, 0x64,
+            0x69, 0x61, 0x62, 0x6C, 0x6F, 0x20, 0x69, 0x69
     };
 
     private D2BinaryReader reader;
@@ -50,14 +50,14 @@ class D2BinaryReaderTest {
     }
 
     @Test
-    void setBytePos() {
-        assertThat(reader.setBytePos(10).readByte()).isEqualTo((byte) 0x64);
+    void setByteIndex() {
+        assertThat(reader.setByteIndex(10).readByte()).isEqualTo((byte) 0x64);
     }
 
     @Test
     void findWorks() {
         reader.find(new byte[]{0x77, 0x6F});
-        assertThat(reader.bytePos()).isEqualTo(6);
+        assertThat(reader.byteIndex()).isEqualTo(6);
     }
 
     @Test
@@ -67,66 +67,63 @@ class D2BinaryReaderTest {
     }
 
     @Test
-    void readWorks() {
+    void readBitsWorks() {
         reader = new D2BinaryReader(new byte[]{0b01010101});
-        assertThat(reader.read(5)).isEqualTo(0b00001010);
-        assertThat(reader.bitPos()).isEqualTo(5);
+        assertThat(reader.read(5)).isEqualTo(0b00010101);
+        assertThat(reader.bitIndex()).isEqualTo(5);
     }
 
-    // First 8 bytes of data:
-    //              01101000 01100101 01101100 01101100 01101111 00100000 01110111 01101111
     @ParameterizedTest
     @CsvSource(textBlock = """
             0,  1,  0
-            0,  5,  01101
+            0,  5,  1000
             0,  8,  01101000
-            0,  10, 01101000 01
-            0,  16, 01101000 01100101
-            0,  20, 01101000 01100101 0110
-            0,  32, 01101000 01100101 01101100 01101100
-            1,  8,   1101000 0
-            2,  8,    101000 01
-            7,  8,         0 0110010
-            8,  8,           01100101
-            9,  8,            1100101 0
-            10, 8,             100101 01
-            3,  1,     0
-            3,  5,     01000
-            3,  8,     01000 011
-            3,  13,    01000 01100101
-            3,  16,    01000 01100101 011
-            3,  21,    01000 01100101 01101100
-            3,  32,    01000 01100101 01101100 01101100 011
-            10, 1,             1
-            10, 5,             10010
-            10, 8,             100101 01
-            10, 13,            100101 0110110
-            10, 16,            100101 01101100 01
-            10, 21,            100101 01101100 0110110
-            10, 32,            100101 01101100 01101100 01101111 00
+            0,  10, 01 01101000
+            0,  16, 01100101 01101000
+            0,  20, 1100 01100101 01101000
+            0,  32, 01101100 01101100 01100101 01101000
+            3,  1,  1
+            3,  5,  01101
+            3,  8,  10101101
+            3,  13, 01100 10101101
+            3,  16, 10001100 10101101
+            3,  21, 011011 0001100 10101101
+            3,  32, 11101101 10001101 10001100 10101101
+            10, 1,  1
+            10, 5,  11001
+            10, 8,  00011001
+            10, 13, 11011 00011001
+            10, 16, 00011011 00011001
+            10, 21, 11011 00011011 00011001
+            10, 32, 00011011 11011011 00011011 00011001
+            1,  8,  10110100
+            2,  8,  01011010
+            7,  8,  11001010
+            8,  8,  01100101
+            9,  8,  00110010
+            10, 8,  00011001
             """)
-    void readWorks(int start, int size, String expect) {
-        assertThatBinary(reader.skip(start).read(size)).isEqualTo(binaryStringToLong(expect));
-        assertThat(reader.bitPos()).isEqualTo(start + size);
-    }
-
-    // First 8 bytes of data:
-    // 01101000 01100101 01101100 01101100 01101111 00100000 01110111 01101111
-    @Test
-    void readMultipleTimesWorks() {
-        assertThatBinary(reader.read(5)).isEqualTo(binaryStringToLong("01101"));
-        assertThatBinary(reader.read(12)).isEqualTo(binaryStringToLong("000 01100101 0"));
-        assertThatBinary(reader.skip(8).read(3)).isEqualTo(binaryStringToLong("110"));
+    void readBitsWorks(int start, int size, String expect) {
+        assertThatBinary(reader.skip(start).read(size)).isEqualTo(binaryToLong(expect));
+        assertThat(reader.bitIndex()).isEqualTo(start + size);
     }
 
     @Test
-    void readSingleBitWorks() {
+    void readBitsMultipleTimesWorks() {
+        assertThatBinary(reader.read(5)).isEqualTo(binaryToLong("01000"));
+        assertThatBinary(reader.read(12)).isEqualTo(binaryToLong("0011 00101011"));
+        assertThatBinary(reader.skip(18).read(3)).isEqualTo(binaryToLong("101"));
+    }
+
+    @Test
+    void readBitsSingleBitWorks() {
         assertThatBinary(reader.read(1)).isEqualTo(0);
     }
 
     @Test
-    void readLastBitWorks() {
-        assertThatBinary(reader.skip(DATA.length * 8 - 1).read(1)).isEqualTo(1);
+    void readBitsLastBitWorks() {
+        D2BinaryReader d2BinaryReader = reader.skip(DATA.length * 8 - 1);
+        assertThatBinary(d2BinaryReader.read(1)).isEqualTo(0);
     }
 
     @Test
@@ -188,7 +185,7 @@ class D2BinaryReaderTest {
     @Test
     void readStringWorks() {
         assertThat(reader.readString(5)).isEqualTo("hello");
-        assertThat(reader.bitPos()).isEqualTo(40);
+        assertThat(reader.bitIndex()).isEqualTo(40);
     }
 
     @Test

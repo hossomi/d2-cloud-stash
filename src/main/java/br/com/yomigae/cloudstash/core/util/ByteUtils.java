@@ -3,6 +3,8 @@ package br.com.yomigae.cloudstash.core.util;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 
+import java.util.function.UnaryOperator;
+
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ByteUtils {
 
@@ -22,5 +24,17 @@ public class ByteUtils {
             data >>= 1;
         }
         return flip;
+    }
+
+    public static byte flipBits(byte data) {
+        return (byte) (flipBits(data, 8) & 0xff);
+    }
+
+    public static byte[] transform(byte[] data, UnaryOperator<Byte> mapper) {
+        byte[] mapped = new byte[data.length];
+        for (int b = 0; b < data.length; b++) {
+            mapped[b] = mapper.apply(data[b]);
+        }
+        return mapped;
     }
 }

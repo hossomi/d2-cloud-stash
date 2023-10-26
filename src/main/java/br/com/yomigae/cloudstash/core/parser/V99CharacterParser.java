@@ -8,9 +8,9 @@ import br.com.yomigae.cloudstash.core.model.character.CharacterClass;
 import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
 import br.com.yomigae.cloudstash.core.model.hireling.HirelingType;
 import br.com.yomigae.cloudstash.core.model.progression.*;
+import br.com.yomigae.cloudstash.core.util.FunctionUtils;
 
 import java.time.Instant;
-import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.IntStream;
 
@@ -58,9 +58,9 @@ public class V99CharacterParser extends VersionCharacterParser {
                         new Dual<>(
                                 Skill.fromId(reader.readInt()),
                                 Skill.fromId(reader.readInt()))))
-                .name(reader.setBytePos(0x010B).readString(16))
+                .name(reader.setByteIndex(0x010B).readString(16))
                 .hireling(Hireling.builder()
-                        .dead(reader.setBytePos(0x00B1).readShort() > 0)
+                        .dead(reader.setByteIndex(0x00B1).readShort() > 0)
                         .nameId(reader.skipBytes(4).readShort())
                         .type(HirelingType.fromId(reader.readShort(), expansion))
                         .experience(reader.readInt())
@@ -126,10 +126,10 @@ public class V99CharacterParser extends VersionCharacterParser {
                     .quests()
                     .set(parseGenericQuest(SIEGE_ON_HARROGATH, reader.skipBytes(4)))
                     .set(parseGenericQuest(RESCUE_ON_MOUNTAIN_ARREAT, reader))
-                    .set(with(reader.readShort(), q -> QuestStatus.PrisonOfIce.builder()
-                            .completed((q & 0x0001) > 0)
-                            // TODO: Figure out the actual bit
-                            .scrollConsumed((q & 0x0040) > 0))
+                    .set(FunctionUtils.with(reader.readShort(), q -> QuestStatus.PrisonOfIce.builder()
+                                    .completed((q & 0x0001) > 0)
+                                    // TODO: Figure out the actual bit
+                                    .scrollConsumed((q & 0x0040) > 0))
                             .build())
                     .set(parseGenericQuest(BETRAYAL_OF_HARROGATH, reader))
                     .set(parseGenericQuest(RITE_OF_PASSAGE, reader))
@@ -138,14 +138,15 @@ public class V99CharacterParser extends VersionCharacterParser {
             reader.skipBytes(14);
         }
 
-        reader.find("WS".getBytes()).skipBytes(8);
+        reader.find("WS".getBytes());
+        System.out.printf("Waypoints: %x (%d)\n", reader.byteIndex(), reader.byteIndex());
+        reader.skipBytes(8);
         for (Difficulty difficulty : Difficulty.all()) {
             reader.skipBytes(2);
             long data = 0;
             for (int i = 0; i < 5; i++) {
                 data = data << 8 | flipBits(reader.readByte(), 8) & 0xffL;
             }
-            System.out.printf("%x\n", data);
             long bit = 0x10000000000L;
             actStatus.get(Act.from(difficulty, 0)).waypoints()
                     .set(new WaypointStatus(ROGUE_ENCAMPMENT, (data & (bit >>= 1)) > 0))
@@ -208,22 +209,15 @@ public class V99CharacterParser extends VersionCharacterParser {
                                 (a, b) -> {throw new RuntimeException();},
                                 Character.Progression.Builder::build)
                 )));
+        System.out.printf("Waypoints: %x (%d)\n", reader.byteIndex(), reader.byteIndex());
     }
 
-    public static void main(String[] args) {
-        int x = 0x80;
-        System.out.printf("%x\n", 0xff & (x >>= 1));
-        System.out.printf("%x\n", 0xff & (x >>= 1));
-        System.out.printf("%x\n", 0xff & (x >>= 1));
-        System.out.printf("%x\n", 0xff & (x >>= 1));
-        System.out.printf("%x\n", 0xff & (x >>= 1));
+    @Override
+    protected void parseAttributes(D2BinaryReader reader, CharacterBuilder character) {
+
     }
 
     private static QuestStatus.Generic parseGenericQuest(Quest quest, D2BinaryReader reader) {
         return new QuestStatus.Generic(quest, (reader.readShort() & 0x0001) == 1);
-    }
-
-    public static <T, R> R with(T in, Function<T, R> mapper) {
-        return mapper.apply(in);
     }
 }

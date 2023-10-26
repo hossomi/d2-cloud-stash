@@ -15,7 +15,7 @@ public class DelegatingCharacterParser extends CharacterParser {
     public Character parse(byte[] data) {
         D2BinaryReader reader = new D2BinaryReader(data);
 
-        int version = reader.setBytePos(0x04).readInt();
+        int version = reader.setByteIndex(0x04).readInt();
         CharacterParser parser = versionParsers.get(version);
         if (parser == null) {
             throw new D2ParserException("Unknown version: " + version);
@@ -31,6 +31,11 @@ public class DelegatingCharacterParser extends CharacterParser {
 
     @Override
     protected void parseHeader(D2BinaryReader reader, CharacterBuilder character) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected void parseAttributes(D2BinaryReader reader, CharacterBuilder character) {
         throw new UnsupportedOperationException();
     }
 }

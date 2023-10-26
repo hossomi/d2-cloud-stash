@@ -26,7 +26,7 @@ public abstract class CharacterParser {
     }
 
     public Character parse(D2BinaryReader reader) {
-        reader.setBytePos(0);
+        reader.setByteIndex(0);
         int signature = reader.readInt();
         int version = reader.readInt();
         int fileSize = reader.readInt();
@@ -49,11 +49,13 @@ public abstract class CharacterParser {
 
         CharacterBuilder character = Character.builder();
         parseHeader(reader, character);
-        System.out.println("%x".formatted(reader.bytePos()));
+        parseAttributes(reader, character);
         return character.build();
     }
 
     protected abstract void checkVersion(int version);
 
     protected abstract void parseHeader(D2BinaryReader reader, CharacterBuilder character);
+
+    protected abstract void parseAttributes(D2BinaryReader reader, CharacterBuilder character);
 }
