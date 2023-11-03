@@ -5,7 +5,7 @@ import br.com.yomigae.cloudstash.core.model.ActMap;
 import br.com.yomigae.cloudstash.core.model.Difficulty;
 import br.com.yomigae.cloudstash.core.model.DifficultyMap;
 import br.com.yomigae.cloudstash.core.model.character.Character;
-import br.com.yomigae.cloudstash.core.model.character.Character.CharacterBuilder;
+import br.com.yomigae.cloudstash.core.model.character.Character.Builder;
 import br.com.yomigae.cloudstash.core.model.progression.*;
 
 import java.io.IOException;
@@ -53,7 +53,7 @@ public abstract class CharacterParser {
 
         checkVersion(version);
 
-        CharacterBuilder character = Character.builder();
+        Builder character = Character.builder();
         parseHeader(reader, character);
         parseProgression(reader, character);
         parseAttributes(reader, character);
@@ -62,9 +62,9 @@ public abstract class CharacterParser {
 
     protected abstract void checkVersion(int version);
 
-    protected abstract void parseHeader(D2BinaryReader reader, CharacterBuilder character);
+    protected abstract void parseHeader(D2BinaryReader reader, Builder character);
 
-    protected void parseProgression(D2BinaryReader reader, CharacterBuilder character) {
+    protected void parseProgression(D2BinaryReader reader, Builder character) {
         ActMap<ActProgression.Builder<?, ?, ?>> actProgression = new ActMap<>();
         Difficulty.all().forEach(difficulty -> {
             actProgression.put(difficulty, 0, Act1Progression.builder().difficulty(difficulty));
@@ -91,5 +91,5 @@ public abstract class CharacterParser {
 
     protected abstract void parseWaypoints(D2BinaryReader reader, ActMap<ActProgression.Builder<?, ?, ?>> progressions);
 
-    protected abstract void parseAttributes(D2BinaryReader reader, CharacterBuilder character);
+    protected abstract void parseAttributes(D2BinaryReader reader, Builder character);
 }

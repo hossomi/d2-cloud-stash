@@ -99,7 +99,7 @@ public record Character(
         return progression.get(difficulty);
     }
 
-    @Builder(builderClassName = "Builder")
+    @lombok.Builder
     public record Progression(
             Act1Progression act1,
             Act2Progression act2,

@@ -3,7 +3,7 @@ package br.com.yomigae.cloudstash.core.parser;
 import br.com.yomigae.cloudstash.core.io.D2BinaryReader;
 import br.com.yomigae.cloudstash.core.model.ActMap;
 import br.com.yomigae.cloudstash.core.model.character.Character;
-import br.com.yomigae.cloudstash.core.model.character.Character.CharacterBuilder;
+import br.com.yomigae.cloudstash.core.model.character.Character.Builder;
 import br.com.yomigae.cloudstash.core.model.progression.ActProgression;
 
 import java.util.Map;
@@ -32,12 +32,12 @@ public class DelegatingCharacterParser extends CharacterParser {
     }
 
     @Override
-    protected void parseHeader(D2BinaryReader reader, CharacterBuilder character) {
+    protected void parseHeader(D2BinaryReader reader, Builder character) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected void parseAttributes(D2BinaryReader reader, CharacterBuilder character) {
+    protected void parseAttributes(D2BinaryReader reader, Builder character) {
         throw new UnsupportedOperationException();
     }
 

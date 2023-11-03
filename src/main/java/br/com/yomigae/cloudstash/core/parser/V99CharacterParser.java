@@ -2,7 +2,7 @@ package br.com.yomigae.cloudstash.core.parser;
 
 import br.com.yomigae.cloudstash.core.io.D2BinaryReader;
 import br.com.yomigae.cloudstash.core.model.*;
-import br.com.yomigae.cloudstash.core.model.character.Character.CharacterBuilder;
+import br.com.yomigae.cloudstash.core.model.character.Character.Builder;
 import br.com.yomigae.cloudstash.core.model.character.CharacterClass;
 import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
 import br.com.yomigae.cloudstash.core.model.hireling.HirelingType;
@@ -24,7 +24,7 @@ public class V99CharacterParser extends VersionCharacterParser {
     }
 
     @Override
-    protected void parseHeader(D2BinaryReader reader, CharacterBuilder character) {
+    protected void parseHeader(D2BinaryReader reader, Builder character) {
         character.activeEquipmentSet(EquipmentSet.fromIndex(reader.readInt()));
 
         byte flags = reader.skipBytes(16).readByte();
@@ -60,7 +60,7 @@ public class V99CharacterParser extends VersionCharacterParser {
         parseHireling(reader, character, expansion);
     }
 
-    private void parseHireling(D2BinaryReader reader, CharacterBuilder character, boolean expansion) {
+    private void parseHireling(D2BinaryReader reader, Builder character, boolean expansion) {
         reader.setByteIndex(0x00b1);
         boolean dead = reader.readShort() > 0;
         int id = reader.readInt();
@@ -207,7 +207,7 @@ public class V99CharacterParser extends VersionCharacterParser {
     }
 
     @Override
-    protected void parseAttributes(D2BinaryReader reader, CharacterBuilder character) {
+    protected void parseAttributes(D2BinaryReader reader, Builder character) {
         reader.find("gf".getBytes()).skipBytes(2);
         for (long id = reader.read(9); id != 0x1ff; id = reader.read(9)) {
             SaveFileAttribute key = saveFileAttribute((int) id);

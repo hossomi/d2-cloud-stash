@@ -17,7 +17,7 @@ import java.util.Optional;
 @EqualsAndHashCode(callSuper = true)
 public class Act4Progression extends ActProgression<Act4Progression.Quests, Act4Progression.Waypoints> {
 
-    @lombok.Builder(builderMethodName = "", builderClassName = "Builder")
+    @lombok.Builder(builderMethodName = "")
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
     public static class Quests extends ActProgression.Quests {
         QuestStatus theFallenAngel;
@@ -49,7 +49,7 @@ public class Act4Progression extends ActProgression<Act4Progression.Quests, Act4
         }
     }
 
-    @lombok.Builder(builderMethodName = "", builderClassName = "Builder")
+    @lombok.Builder(builderMethodName = "")
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
     public static class Waypoints extends ActProgression.Waypoints {
         WaypointStatus pandemoniumFortress;
@@ -106,7 +106,7 @@ public class Act4Progression extends ActProgression<Act4Progression.Quests, Act4
         }
     }
 
-    @lombok.Builder(builderClassName = "Builder")
+    @lombok.Builder
     public Act4Progression(Difficulty difficulty, boolean visited, boolean introduced, Quests quests, Waypoints waypoints) {
         super(Act.from(difficulty, 3), visited, introduced, quests, waypoints);
     }
