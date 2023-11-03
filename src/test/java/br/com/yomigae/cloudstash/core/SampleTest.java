@@ -434,7 +434,7 @@ public class SampleTest {
                                         .done()
                                         .waypoints()
                                         .set(new WaypointStatus(Area.ROGUE_ENCAMPMENT, true))
-                                        .set(new WaypointStatus(Area.COLD_PLAINS, true))
+                                        .set(new WaypointStatus(Area.COLD_PLAINS, false))
                                         .set(new WaypointStatus(Area.STONY_FIELD, false))
                                         .set(new WaypointStatus(Area.DARK_WOOD, false))
                                         .set(new WaypointStatus(Area.BLACK_MARSH, false))
@@ -768,6 +768,19 @@ public class SampleTest {
                                         .build())
                                 .build()
                 )))
+                .attribute(Attribute.STRENGTH, 25)
+                .attribute(Attribute.DEXTERITY, 20)
+                .attribute(Attribute.ENERGY, 15)
+                .attribute(Attribute.VITALITY, 25)
+                .attribute(Attribute.STAT_POINTS, 5)
+                .attribute(Attribute.SKILL_POINTS, 1)
+                .attribute(Attribute.LIFE, 57)
+                .attribute(Attribute.MAX_LIFE, 57)
+                .attribute(Attribute.MANA, 16)
+                .attribute(Attribute.MAX_MANA, 16)
+                .attribute(Attribute.STAMINA, 89)
+                .attribute(Attribute.MAX_STAMINA, 90)
+                .attribute(Attribute.EXPERIENCE, 1069)
                 .build());
     }
 

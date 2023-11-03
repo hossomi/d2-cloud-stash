@@ -4,10 +4,12 @@ import br.com.yomigae.cloudstash.core.model.*;
 import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
 import br.com.yomigae.cloudstash.core.model.progression.*;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
+import lombok.Singular;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static br.com.yomigae.cloudstash.core.util.StringUtils.Divider.SINGLE;
 import static br.com.yomigae.cloudstash.core.util.StringUtils.checkbox;
@@ -22,7 +24,7 @@ public record Character(
         boolean hardcore,
 
         int level,
-        @EqualsAndHashCode.Exclude Instant lastPlayed,
+        Instant lastPlayed,
         Act currentAct,
         boolean dead,
         EquipmentSet activeEquipmentSet,
@@ -30,7 +32,35 @@ public record Character(
         List<Skill> skillHotkeys,
 
         Hireling hireling,
-        DifficultyMap<Progression> progression) {
+        DifficultyMap<Progression> progression,
+
+        @Singular
+        Map<Attribute, Integer> attributes) {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
+        Character character = (Character) o;
+        return ladder == character.ladder
+                && expansion == character.expansion
+                && hardcore == character.hardcore
+                && level == character.level
+                && dead == character.dead
+                && name.equals(character.name)
+                && klass == character.klass
+                && currentAct == character.currentAct
+                && activeEquipmentSet == character.activeEquipmentSet
+                && mouseSkill.equals(character.mouseSkill)
+                && skillHotkeys.equals(character.skillHotkeys)
+                && Objects.equals(hireling, character.hireling)
+                && progression.equals(character.progression)
+                && attributes.equals(character.attributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, klass, ladder, expansion, hardcore, level, currentAct, dead, activeEquipmentSet, mouseSkill, skillHotkeys, hireling, progression, attributes);
+    }
 
     @Override
     public String toString() {
@@ -50,7 +80,18 @@ public record Character(
                 .append(quests));
 
         string
-                .append("\n\n").append(hireling);
+                .append("\n\nAttributes")
+                .append("\n").append(divider(SINGLE));
+        attributes.keySet()
+                .stream()
+                .sorted()
+                .forEach((a) -> string
+                        .append("\n").append(a.label()).append(": ")
+                        .append(a.format(attributes.get(a))));
+
+        if (hireling != null) {
+            string.append("\n\n").append(hireling);
+        }
         return string.toString();
     }
 
@@ -68,10 +109,6 @@ public record Character(
 
         List<ActProgression<?, ?>> acts() {
             return List.of(act1, act2, act3, act4, act5);
-        }
-
-        ActProgression<?, ?> act(int a) {
-            return acts().get(a);
         }
 
         @Override

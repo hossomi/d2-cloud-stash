@@ -33,10 +33,10 @@ class ByteUtilsTest {
 
     @ParameterizedTest
     @CsvSource(textBlock = """
-            0x656C6C67, 1,  0x67
-            0x656C6C67, 2,  0x676C
-            0x656C6C67, 3,  0x676C6C
-            0x656C6C67, 4,  0x676C6C65
+            0x656c6c67, 1,  0x67
+            0x656c6c67, 2,  0x676c
+            0x656c6c67, 3,  0x676c6c
+            0x656c6c67, 4,  0x676c6c65
             """)
     void flipBytesWorks(long data, int bits, long expected) {
         assertThatBinary(flipBytes(data, bits)).isEqualTo(expected);

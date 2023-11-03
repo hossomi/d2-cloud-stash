@@ -12,6 +12,14 @@ public class ActMap<V> extends EnumMap<Act, V> {
         super(Act.class);
     }
 
+    public V get(Difficulty difficulty, int number) {
+        return get(Act.from(difficulty, number));
+    }
+
+    public V put(Difficulty difficulty, int number, V value) {
+        return put(Act.from(difficulty, number), value);
+    }
+
     public List<V> difficulty(Difficulty difficulty) {
         return List.copyOf(filterKeys(this, a -> a.difficulty() == difficulty).values());
     }

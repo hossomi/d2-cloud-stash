@@ -6,18 +6,22 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Attribute {
-    LIFE("Life"),
-    LIFE_REGENERATION("Life Regeneration", "/sec"),
-    MANA("Mana"),
-    MANA_REGENERATION("Mana Regeneration", "/sec"),
-    DEFENSE("Defense"),
-    ATTACK_RATING("Attack Rating"),
     STRENGTH("Strength"),
     DEXTERITY("Dexterity"),
     VITALITY("Vitality"),
     ENERGY("Energy"),
     MIN_DAMAGE("Min. Damage"),
     MAX_DAMAGE("Max. Damage"),
+    ATTACK_RATING("Attack Rating"),
+    DEFENSE("Defense"),
+    LIFE("Life"),
+    MAX_LIFE("Max Life"),
+    LIFE_REGENERATION("Life Regeneration", "/sec"),
+    MANA("Mana"),
+    MAX_MANA("Max Mana"),
+    MANA_REGENERATION("Mana Regeneration", "/sec"),
+    STAMINA("Stamina"),
+    MAX_STAMINA("Max Stamina"),
     FIRE_RESISTANCE("Fire Resistance", "%"),
     COLD_RESISTANCE("Cold Resistance", "%"),
     LIGHTNING_RESISTANCE("Lightning Resistance", "%"),
@@ -26,7 +30,10 @@ public enum Attribute {
     PHYSICAL_RESISTANCE("Physical Resistance", "%"),
     EXPERIENCE("Experience"),
     EXPERIENCE_REQUIRED("Experience Required"),
-    GOLD("Gold", "$");
+    GOLD("Gold", "$"),
+    GOLD_BANK("Gold Bank", "$"),
+    STAT_POINTS("Stat Points"),
+    SKILL_POINTS("Skill Points");
 
     private final String label;
     private final String unit;

@@ -12,14 +12,15 @@ import static br.com.yomigae.cloudstash.core.util.StringUtils.list;
 
 public record Hireling(
         HirelingType type,
+        int id,
         String name,
         boolean dead,
         int experience)
         implements HasAttributes, HasSkills {
 
     @Builder
-    public Hireling(HirelingType type, int nameId, boolean dead, int experience) {
-        this(type, type.names().get(nameId), dead, experience);
+    public Hireling(HirelingType type, int id, int nameId, boolean dead, int experience) {
+        this(type, id, type.names().get(nameId), dead, experience);
     }
 
     public int level() {

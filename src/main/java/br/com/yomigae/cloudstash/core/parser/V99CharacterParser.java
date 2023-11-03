@@ -2,23 +2,20 @@ package br.com.yomigae.cloudstash.core.parser;
 
 import br.com.yomigae.cloudstash.core.io.D2BinaryReader;
 import br.com.yomigae.cloudstash.core.model.*;
-import br.com.yomigae.cloudstash.core.model.character.Character;
 import br.com.yomigae.cloudstash.core.model.character.Character.CharacterBuilder;
 import br.com.yomigae.cloudstash.core.model.character.CharacterClass;
 import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
 import br.com.yomigae.cloudstash.core.model.hireling.HirelingType;
-import br.com.yomigae.cloudstash.core.model.progression.*;
+import br.com.yomigae.cloudstash.core.model.progression.ActProgression;
+import br.com.yomigae.cloudstash.core.model.progression.Quest;
+import br.com.yomigae.cloudstash.core.model.progression.QuestStatus;
 import br.com.yomigae.cloudstash.core.util.FunctionUtils;
 
 import java.time.Instant;
-import java.util.stream.Collector;
 import java.util.stream.IntStream;
 
-import static br.com.yomigae.cloudstash.core.model.Area.*;
-import static br.com.yomigae.cloudstash.core.model.progression.Quest.DEN_OF_EVIL;
-import static br.com.yomigae.cloudstash.core.model.progression.Quest.*;
-import static br.com.yomigae.cloudstash.core.util.ByteUtils.flipBits;
-import static java.util.stream.Collectors.groupingBy;
+import static br.com.yomigae.cloudstash.core.parser.ParserUtils.SaveFileAttribute;
+import static br.com.yomigae.cloudstash.core.parser.ParserUtils.saveFileAttribute;
 
 public class V99CharacterParser extends VersionCharacterParser {
 
@@ -48,7 +45,7 @@ public class V99CharacterParser extends VersionCharacterParser {
         character.skillHotkeys(IntStream.range(0, 16)
                         .mapToObj(x -> {
                             int id = reader.readInt();
-                            return id != 0xFFFF ? Skill.fromId(id) : null;
+                            return id != 0xffff ? Skill.fromId(id) : null;
                         })
                         .toList())
                 .mouseSkill(new Swap<>(
@@ -58,166 +55,170 @@ public class V99CharacterParser extends VersionCharacterParser {
                         new Dual<>(
                                 Skill.fromId(reader.readInt()),
                                 Skill.fromId(reader.readInt()))))
-                .name(reader.setByteIndex(0x010B).readString(16))
-                .hireling(Hireling.builder()
-                        .dead(reader.setByteIndex(0x00B1).readShort() > 0)
-                        .nameId(reader.skipBytes(4).readShort())
-                        .type(HirelingType.fromId(reader.readShort(), expansion))
-                        .experience(reader.readInt())
-                        .build());
+                .name(reader.setByteIndex(0x010b).readString(16));
 
+        parseHireling(reader, character, expansion);
+    }
+
+    private void parseHireling(D2BinaryReader reader, CharacterBuilder character, boolean expansion) {
+        reader.setByteIndex(0x00b1);
+        boolean dead = reader.readShort() > 0;
+        int id = reader.readInt();
+        if (id == 0) {
+            return;
+        }
+
+        character.hireling(Hireling.builder()
+                .id(id)
+                .dead(dead)
+                .nameId(reader.readShort())
+                .type(HirelingType.fromId(reader.readShort(), expansion))
+                .experience(reader.readInt())
+                .build());
+    }
+
+    @Override
+    protected void parseQuests(D2BinaryReader reader, ActMap<ActProgression.Builder<?, ?, ?>> progressions) {
         reader.find("Woo!".getBytes()).skipBytes(10);
-        ActMap<ActProgression.Builder<?, ?, ?>> actStatus = new ActMap<>();
         for (Difficulty difficulty : Difficulty.all()) {
-            actStatus.put(Act.from(difficulty, 0), Act1Progression.builder()
-                    .difficulty(difficulty)
+            progressions.get(difficulty, 0)
                     .visited(true)
                     .introduced(reader.readShort() > 0)
                     .quests()
-                    .set(parseGenericQuest(DEN_OF_EVIL, reader))
-                    .set(parseGenericQuest(SISTERS_BURIAL_GROUNDS, reader))
-                    .set(parseGenericQuest(TOOLS_OF_THE_TRADE, reader))
-                    .set(parseGenericQuest(THE_SEARCH_FOR_CAIN, reader))
-                    .set(parseGenericQuest(THE_FORGOTTEN_TOWER, reader))
-                    .set(parseGenericQuest(SISTERS_TO_THE_SLAUGHTER, reader))
-                    .done());
+                    .set(parseGenericQuest(reader, Quest.DEN_OF_EVIL))
+                    .set(parseGenericQuest(reader, Quest.SISTERS_BURIAL_GROUNDS))
+                    .set(parseGenericQuest(reader, Quest.TOOLS_OF_THE_TRADE))
+                    .set(parseGenericQuest(reader, Quest.THE_SEARCH_FOR_CAIN))
+                    .set(parseGenericQuest(reader, Quest.THE_FORGOTTEN_TOWER))
+                    .set(parseGenericQuest(reader, Quest.SISTERS_TO_THE_SLAUGHTER))
+                    .done();
 
-            actStatus.put(Act.from(difficulty, 1), Act2Progression.builder()
-                    .difficulty(difficulty)
+            progressions.get(difficulty, 1)
                     .visited(reader.readShort() > 0)
                     .introduced(reader.readShort() > 0)
                     .quests()
-                    .set(parseGenericQuest(RADAMENTS_LAIR, reader))
-                    .set(parseGenericQuest(THE_HORADRIC_STAFF, reader))
-                    .set(parseGenericQuest(TAINTED_SUN, reader))
-                    .set(parseGenericQuest(Quest.ARCANE_SANCTUARY, reader))
-                    .set(parseGenericQuest(THE_SUMMONER, reader))
-                    .set(parseGenericQuest(THE_SEVEN_TOMBS, reader))
-                    .done());
+                    .set(parseGenericQuest(reader, Quest.RADAMENTS_LAIR))
+                    .set(parseGenericQuest(reader, Quest.THE_HORADRIC_STAFF))
+                    .set(parseGenericQuest(reader, Quest.TAINTED_SUN))
+                    .set(parseGenericQuest(reader, Quest.ARCANE_SANCTUARY))
+                    .set(parseGenericQuest(reader, Quest.THE_SUMMONER))
+                    .set(parseGenericQuest(reader, Quest.THE_SEVEN_TOMBS))
+                    .done();
 
-            actStatus.put(Act.from(difficulty, 2), Act3Progression.builder()
-                    .difficulty(difficulty)
+            progressions.get(difficulty, 2)
                     .visited(reader.readShort() > 0)
                     .introduced(reader.readShort() > 0)
                     .quests()
-                    .set(parseGenericQuest(LAM_ESENS_TOME, reader))
-                    .set(parseGenericQuest(KHALIMS_WILL, reader))
-                    .set(parseGenericQuest(BLADE_OF_THE_OLD_RELIGION, reader))
-                    .set(parseGenericQuest(THE_GOLDEN_BIRD, reader))
-                    .set(parseGenericQuest(THE_BLACKENED_TEMPLE, reader))
-                    .set(parseGenericQuest(THE_GUARDIAN, reader))
-                    .done());
+                    .set(parseGenericQuest(reader, Quest.LAM_ESENS_TOME))
+                    .set(parseGenericQuest(reader, Quest.KHALIMS_WILL))
+                    .set(parseGenericQuest(reader, Quest.BLADE_OF_THE_OLD_RELIGION))
+                    .set(parseGenericQuest(reader, Quest.THE_GOLDEN_BIRD))
+                    .set(parseGenericQuest(reader, Quest.THE_BLACKENED_TEMPLE))
+                    .set(parseGenericQuest(reader, Quest.THE_GUARDIAN))
+                    .done();
 
-            actStatus.put(Act.from(difficulty, 3), Act4Progression.builder()
-                    .difficulty(difficulty)
+            progressions.get(difficulty, 3)
                     .visited(reader.readShort() > 0)
                     .introduced(reader.readShort() > 0)
                     .quests()
-                    .set(parseGenericQuest(THE_FALLEN_ANGEL, reader))
-                    .set(parseGenericQuest(HELLS_FORGE, reader))
-                    .set(parseGenericQuest(TERRORS_END, reader))
-                    .done());
+                    .set(parseGenericQuest(reader, Quest.THE_FALLEN_ANGEL))
+                    .set(parseGenericQuest(reader, Quest.HELLS_FORGE))
+                    .set(parseGenericQuest(reader, Quest.TERRORS_END))
+                    .done();
 
-            actStatus.put(Act.from(difficulty, 4), Act5Progression.builder()
-                    .difficulty(difficulty)
+            progressions.get(difficulty, 4)
                     // TODO: Act 5 visited/introduced is always zero?
                     .visited(reader.skipBytes(6).readShort() > 0)
                     .introduced(reader.readShort() > 0)
                     .quests()
-                    .set(parseGenericQuest(SIEGE_ON_HARROGATH, reader.skipBytes(4)))
-                    .set(parseGenericQuest(RESCUE_ON_MOUNTAIN_ARREAT, reader))
+                    .set(parseGenericQuest(reader.skipBytes(4), Quest.SIEGE_ON_HARROGATH))
+                    .set(parseGenericQuest(reader, Quest.RESCUE_ON_MOUNTAIN_ARREAT))
                     .set(FunctionUtils.with(reader.readShort(), q -> QuestStatus.PrisonOfIce.builder()
                                     .completed((q & 0x0001) > 0)
                                     // TODO: Figure out the actual bit
                                     .scrollConsumed((q & 0x0040) > 0))
                             .build())
-                    .set(parseGenericQuest(BETRAYAL_OF_HARROGATH, reader))
-                    .set(parseGenericQuest(RITE_OF_PASSAGE, reader))
-                    .set(parseGenericQuest(EVE_OF_DESTRUCTION, reader))
-                    .done());
+                    .set(parseGenericQuest(reader, Quest.BETRAYAL_OF_HARROGATH))
+                    .set(parseGenericQuest(reader, Quest.RITE_OF_PASSAGE))
+                    .set(parseGenericQuest(reader, Quest.EVE_OF_DESTRUCTION))
+                    .done();
             reader.skipBytes(14);
         }
+    }
 
+    @Override
+    protected void parseWaypoints(D2BinaryReader reader, ActMap<ActProgression.Builder<?, ?, ?>> progressions) {
         reader.find("WS".getBytes());
-        System.out.printf("Waypoints: %x (%d)\n", reader.byteIndex(), reader.byteIndex());
         reader.skipBytes(8);
         for (Difficulty difficulty : Difficulty.all()) {
             reader.skipBytes(2);
-            long data = 0;
-            for (int i = 0; i < 5; i++) {
-                data = data << 8 | flipBits(reader.readByte(), 8) & 0xffL;
-            }
-            long bit = 0x10000000000L;
-            actStatus.get(Act.from(difficulty, 0)).waypoints()
-                    .set(new WaypointStatus(ROGUE_ENCAMPMENT, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(COLD_PLAINS, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(STONY_FIELD, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(DARK_WOOD, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(BLACK_MARSH, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(OUTER_CLOISTER, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(JAIL_LEVEL_1, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(INNER_CLOISTER, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(CATACOMBS_LEVEL_2, (data & (bit >>= 1)) > 0))
+            long data = reader.read(40);
+            progressions.get(difficulty, 0).waypoints()
+                    .set(Area.ROGUE_ENCAMPMENT, (data & 0x0000000001L) != 0)
+                    .set(Area.COLD_PLAINS, (data & 0x0000000002L) != 0)
+                    .set(Area.STONY_FIELD, (data & 0x0000000004L) != 0)
+                    .set(Area.DARK_WOOD, (data & 0x0000000008L) != 0)
+                    .set(Area.BLACK_MARSH, (data & 0x0000000010L) != 0)
+                    .set(Area.OUTER_CLOISTER, (data & 0x0000000020L) != 0)
+                    .set(Area.JAIL_LEVEL_1, (data & 0x0000000040L) != 0)
+                    .set(Area.INNER_CLOISTER, (data & 0x0000000080L) != 0)
+                    .set(Area.CATACOMBS_LEVEL_2, (data & 0x0000000100L) != 0)
                     .done();
-            actStatus.get(Act.from(difficulty, 1)).waypoints()
-                    .set(new WaypointStatus(LUT_GHOLEIN, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(LUT_GHOLEIN_SEWERS_LEVEL_2, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(DRY_HILLS, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(HALLS_OF_THE_DEAD_LEVEL_2, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(FAR_OASIS, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(LOST_CITY, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(PALACE_CELLAR_LEVEL_1, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(Area.ARCANE_SANCTUARY, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(CANYON_OF_THE_MAGI, (data & (bit >>= 1)) > 0))
+            progressions.get(difficulty, 1).waypoints()
+                    .set(Area.LUT_GHOLEIN, (data & 0x0000000200L) != 0)
+                    .set(Area.LUT_GHOLEIN_SEWERS_LEVEL_2, (data & 0x0000000400L) != 0)
+                    .set(Area.DRY_HILLS, (data & 0x0000000800L) != 0)
+                    .set(Area.HALLS_OF_THE_DEAD_LEVEL_2, (data & 0x0000001000L) != 0)
+                    .set(Area.FAR_OASIS, (data & 0x0000002000L) != 0)
+                    .set(Area.LOST_CITY, (data & 0x0000004000L) != 0)
+                    .set(Area.PALACE_CELLAR_LEVEL_1, (data & 0x0000008000L) != 0)
+                    .set(Area.ARCANE_SANCTUARY, (data & 0x0000010000L) != 0)
+                    .set(Area.CANYON_OF_THE_MAGI, (data & 0x0000020000L) != 0)
                     .done();
-            actStatus.get(Act.from(difficulty, 2)).waypoints()
-                    .set(new WaypointStatus(KURAST_DOCKS, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(SPIDER_FOREST, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(GREAT_MARSH, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(FLAYER_JUNGLE, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(LOWER_KURAST, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(KURAST_BAZAAR, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(UPPER_KURAST, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(TRAVINCAL, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(DURANCE_OF_HATE_LEVEL_2, (data & (bit >>= 1)) > 0))
+            progressions.get(difficulty, 2).waypoints()
+                    .set(Area.KURAST_DOCKS, (data & 0x0000040000L) != 0)
+                    .set(Area.SPIDER_FOREST, (data & 0x0000080000L) != 0)
+                    .set(Area.GREAT_MARSH, (data & 0x0000100000L) != 0)
+                    .set(Area.FLAYER_JUNGLE, (data & 0x0000200000L) != 0)
+                    .set(Area.LOWER_KURAST, (data & 0x0000400000L) != 0)
+                    .set(Area.KURAST_BAZAAR, (data & 0x0000800000L) != 0)
+                    .set(Area.UPPER_KURAST, (data & 0x0001000000L) != 0)
+                    .set(Area.TRAVINCAL, (data & 0x0002000000L) != 0)
+                    .set(Area.DURANCE_OF_HATE_LEVEL_2, (data & 0x0004000000L) != 0)
                     .done();
-            actStatus.get(Act.from(difficulty, 3)).waypoints()
-                    .set(new WaypointStatus(THE_PANDEMONIUM_FORTRESS, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(CITY_OF_THE_DAMNED, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(RIVER_OF_FLAME, (data & (bit >>= 1)) > 0))
+            progressions.get(difficulty, 3).waypoints()
+                    .set(Area.THE_PANDEMONIUM_FORTRESS, (data & 0x0008000000L) != 0)
+                    .set(Area.CITY_OF_THE_DAMNED, (data & 0x0010000000L) != 0)
+                    .set(Area.RIVER_OF_FLAME, (data & 0x0020000000L) != 0)
                     .done();
-            actStatus.get(Act.from(difficulty, 4)).waypoints()
-                    .set(new WaypointStatus(HARROGATH, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(FRIGID_HIGHLANDS, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(ARREAT_PLATEAU, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(CRYSTALLINE_PASSAGE, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(HALLS_OF_PAIN, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(GLACIAL_TRAIL, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(FROZEN_TUNDRA, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(THE_ANCIENTS_WAY, (data & (bit >>= 1)) > 0))
-                    .set(new WaypointStatus(WORLDSTONE_KEEP_LEVEL_2, (data & (bit >>= 1)) > 0))
+            progressions.get(difficulty, 4).waypoints()
+                    .set(Area.HARROGATH, (data & 0x0040000000L) != 0)
+                    .set(Area.FRIGID_HIGHLANDS, (data & 0x0080000000L) != 0)
+                    .set(Area.ARREAT_PLATEAU, (data & 0x0100000000L) != 0)
+                    .set(Area.CRYSTALLINE_PASSAGE, (data & 0x0200000000L) != 0)
+                    .set(Area.HALLS_OF_PAIN, (data & 0x0400000000L) != 0)
+                    .set(Area.GLACIAL_TRAIL, (data & 0x0800000000L) != 0)
+                    .set(Area.FROZEN_TUNDRA, (data & 0x1000000000L) != 0)
+                    .set(Area.THE_ANCIENTS_WAY, (data & 0x2000000000L) != 0)
+                    .set(Area.WORLDSTONE_KEEP_LEVEL_2, (data & 0x4000000000L) != 0)
                     .done();
             reader.skipBytes(17);
         }
-
-        character.progression(actStatus.values().stream()
-                .map(ActProgression.Builder::build)
-                .collect(groupingBy(a -> a.act().difficulty(),
-                        DifficultyMap::new,
-                        Collector.of(Character.Progression::builder,
-                                Character.Progression.Builder::set,
-                                (a, b) -> {throw new RuntimeException();},
-                                Character.Progression.Builder::build)
-                )));
-        System.out.printf("Waypoints: %x (%d)\n", reader.byteIndex(), reader.byteIndex());
     }
 
     @Override
     protected void parseAttributes(D2BinaryReader reader, CharacterBuilder character) {
-
+        reader.find("gf".getBytes()).skipBytes(2);
+        for (long id = reader.read(9); id != 0x1ff; id = reader.read(9)) {
+            SaveFileAttribute key = saveFileAttribute((int) id);
+            int value = (int) reader.read(key.bits());
+            if (key.attribute() != null) {
+                character.attribute(key.attribute(), value / key.factor());
+            }
+        }
     }
 
-    private static QuestStatus.Generic parseGenericQuest(Quest quest, D2BinaryReader reader) {
+    private static QuestStatus.Generic parseGenericQuest(D2BinaryReader reader, Quest quest) {
         return new QuestStatus.Generic(quest, (reader.readShort() & 0x0001) == 1);
     }
 }

@@ -1,28 +1,20 @@
 package br.com.yomigae.cloudstash.core.io;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
-import static br.com.yomigae.cloudstash.core.util.FunctionUtils.noop;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
-import static java.util.Spliterator.ORDERED;
-import static java.util.Spliterators.spliteratorUnknownSize;
-import static java.util.stream.StreamSupport.stream;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class D2Data {
@@ -61,7 +53,7 @@ public class D2Data {
     public record Row(Map<String, Integer> columns, String[] values) {
 
         public boolean has(String column) {
-            return columns.containsKey(column);
+            return !isNullOrEmpty(get(column));
         }
 
         public String get(String column) {

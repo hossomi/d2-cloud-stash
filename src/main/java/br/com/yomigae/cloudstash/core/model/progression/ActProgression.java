@@ -1,6 +1,7 @@
 package br.com.yomigae.cloudstash.core.model.progression;
 
 import br.com.yomigae.cloudstash.core.model.Act;
+import br.com.yomigae.cloudstash.core.model.Area;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -95,6 +96,10 @@ public abstract class ActProgression<Q extends ActProgression.Quests, W extends 
                         status.area(), act.getClass().getDeclaringClass().getSimpleName())));
             }
 
+            public W set(Area area, boolean active) {
+                return set(new WaypointStatus(area, active));
+            }
+
             protected abstract Optional<W> trySet(WaypointStatus status);
         }
     }
@@ -111,6 +116,10 @@ public abstract class ActProgression<Q extends ActProgression.Quests, W extends 
         public abstract A waypoints(W waypoints);
 
         public abstract W waypoints();
+
+        public abstract A visited(boolean visited);
+
+        public abstract A introduced(boolean introduced);
 
         public abstract ActProgression<?, ?> build();
 

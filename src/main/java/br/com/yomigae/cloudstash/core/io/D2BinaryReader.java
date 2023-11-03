@@ -48,10 +48,6 @@ public class D2BinaryReader {
         return data.length;
     }
 
-    public int bitsRemaining() {
-        return data.length * 8 - bit;
-    }
-
     public int bitIndex() {
         return byteIndex * 8 + bitIndex;
     }
@@ -114,10 +110,10 @@ public class D2BinaryReader {
     }
 
     public long read(int bits) {
-        if (bits > Integer.SIZE) {
+        if (bits > Long.SIZE) {
             throw new D2ReaderException(format(
                     "Cannot read more than %d bits (want %d bits)",
-                    Integer.SIZE, bits));
+                    Long.SIZE, bits));
         }
 
         // Use long as a buffer to fit a 4-bytes unsigned int
@@ -132,15 +128,15 @@ public class D2BinaryReader {
 
     public byte readByte() {
         long data = read(8);
-        return (byte) (data & 0xFF);
+        return (byte) (data & 0xff);
     }
 
     public int readInt() {
-        return (int) (read(32) & 0xFFFFFFFFL);
+        return (int) (read(32) & 0xffffffffL);
     }
 
     public short readShort() {
-        return (short) (read(16) & 0x0000FFFFL);
+        return (short) (read(16) & 0x0000ffffL);
     }
 
     public String readString(int size) {

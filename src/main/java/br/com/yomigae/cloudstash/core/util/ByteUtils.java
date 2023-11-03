@@ -11,7 +11,7 @@ public class ByteUtils {
     public static long flipBytes(long data, int bytes) {
         long flip = 0;
         while (bytes-- > 0) {
-            flip = (flip << 8) + (data & 0xFF);
+            flip = (flip << 8) + (data & 0xff);
             data >>= 8;
         }
         return flip;

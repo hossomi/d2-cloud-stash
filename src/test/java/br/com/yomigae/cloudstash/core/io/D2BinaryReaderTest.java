@@ -15,9 +15,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class D2BinaryReaderTest {
 
     public static final byte[] DATA = {
-            0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x77, 0x6F,
-            0x72, 0x6C, 0x64, 0x20, 0x6F, 0x66, 0x20, 0x64,
-            0x69, 0x61, 0x62, 0x6C, 0x6F, 0x20, 0x69, 0x69
+            0x68, 0x65, 0xc, 0x6c, 0x6f, 0x20, 0x77, 0x6f,
+            0x72, 0x6c, 0x64, 0x20, 0x6f, 0x66, 0x20, 0x64,
+            0x69, 0x61, 0x62, 0x6c, 0x6f, 0x20, 0x69, 0x69
     };
 
     private D2BinaryReader reader;
@@ -56,7 +56,7 @@ class D2BinaryReaderTest {
 
     @Test
     void findWorks() {
-        reader.find(new byte[]{0x77, 0x6F});
+        reader.find(new byte[]{0x77, 0x6f});
         assertThat(reader.byteIndex()).isEqualTo(6);
     }
 
@@ -135,7 +135,7 @@ class D2BinaryReaderTest {
     void readByteMultipleTimesWorks() {
         assertThat(reader.readByte()).isEqualTo((byte) 0x68);
         assertThat(reader.readByte()).isEqualTo((byte) 0x65);
-        assertThat(reader.readByte()).isEqualTo((byte) 0x6C);
+        assertThat(reader.readByte()).isEqualTo((byte) 0x6c);
     }
 
     @Test
@@ -156,24 +156,24 @@ class D2BinaryReaderTest {
 
     @Test
     void readIntWorks() {
-        assertThat(reader.readInt()).isEqualTo(0x6C6C6568);
+        assertThat(reader.readInt()).isEqualTo(0x6c6c6568);
     }
 
     @Test
     void readIntMultipleTimesWorks() {
-        assertThat(reader.readInt()).isEqualTo(0x6C6C6568);
-        assertThat(reader.readInt()).isEqualTo(0x6F77206F);
-        assertThat(reader.readInt()).isEqualTo(0x20646C72);
+        assertThat(reader.readInt()).isEqualTo(0x6c6c6568);
+        assertThat(reader.readInt()).isEqualTo(0x6f77206f);
+        assertThat(reader.readInt()).isEqualTo(0x20646c72);
     }
 
     @Test
     void readIntAfterSkipWorks() {
-        assertThat(reader.skipBytes(8).readInt()).isEqualTo(0x20646C72);
+        assertThat(reader.skipBytes(8).readInt()).isEqualTo(0x20646c72);
     }
 
     @Test
     void readIntAtEndOfDataWorks() {
-        assertThat(reader.skipBytes(DATA.length - SIZEOF_INT).readInt()).isEqualTo(0x6969206F);
+        assertThat(reader.skipBytes(DATA.length - SIZEOF_INT).readInt()).isEqualTo(0x6969206f);
     }
 
     @Test
