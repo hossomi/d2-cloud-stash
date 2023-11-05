@@ -83,4 +83,16 @@ public class D2Strings {
     public static Integer id(String key) {
         return throwOnNull(KEYS.inverse().get(key), () -> new D2DataException("Unknown string key: " + key));
     }
+
+    public record D2String(String key) {
+
+        public static D2String d2String(String key) {
+            return new D2String(key);
+        }
+
+        @Override
+        public String toString() {
+            return D2Strings.get(key);
+        }
+    }
 }

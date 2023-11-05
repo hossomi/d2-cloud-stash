@@ -18,7 +18,7 @@ public record Hireling(
         int experience)
         implements HasAttributes, HasSkills {
 
-    @Builder
+    @lombok.Builder
     public Hireling(HirelingType type, int id, int nameId, boolean dead, int experience) {
         this(type, id, type.names().get(nameId), dead, experience);
     }
