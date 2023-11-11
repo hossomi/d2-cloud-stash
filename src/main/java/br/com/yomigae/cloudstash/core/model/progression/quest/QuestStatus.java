@@ -1,6 +1,7 @@
 package br.com.yomigae.cloudstash.core.model.progression.quest;
 
-public interface QuestStatus<Q extends Quest<Q, S>, S extends QuestStatus<Q, S>> {
-    Q quest();
+public interface QuestStatus {
     boolean completed();
+
+    record Generic(boolean completed) implements QuestStatus { }
 }
