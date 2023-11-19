@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static br.com.yomigae.cloudstash.core.util.ValidationUtil.throwOnNull;
+import static br.com.yomigae.cloudstash.core.util.ValidationUtils.throwOnNull;
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.StreamSupport.stream;

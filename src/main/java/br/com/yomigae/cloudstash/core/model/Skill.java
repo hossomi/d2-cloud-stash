@@ -8,7 +8,7 @@ import lombok.Builder;
 import java.util.List;
 import java.util.Map;
 
-import static br.com.yomigae.cloudstash.core.util.ValidationUtil.throwOnNull;
+import static br.com.yomigae.cloudstash.core.util.ValidationUtils.throwOnNull;
 import static com.google.common.collect.Maps.uniqueIndex;
 import static java.util.stream.Collectors.toMap;
 

@@ -2,20 +2,25 @@ package br.com.yomigae.cloudstash.core.parser;
 
 import br.com.yomigae.cloudstash.core.io.D2BinaryReader;
 import br.com.yomigae.cloudstash.core.model.*;
+import br.com.yomigae.cloudstash.core.model.acts.ActStatus;
+import br.com.yomigae.cloudstash.core.model.acts.Quest;
+import br.com.yomigae.cloudstash.core.model.acts.QuestStatus;
+import br.com.yomigae.cloudstash.core.model.character.Character;
 import br.com.yomigae.cloudstash.core.model.character.Character.Builder;
 import br.com.yomigae.cloudstash.core.model.character.CharacterClass;
 import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
 import br.com.yomigae.cloudstash.core.model.hireling.HirelingType;
-import br.com.yomigae.cloudstash.core.model.progression.ActProgression;
-import br.com.yomigae.cloudstash.core.model.progression.Quest;
-import br.com.yomigae.cloudstash.core.model.progression.QuestStatus;
-import br.com.yomigae.cloudstash.core.util.FunctionUtils;
 
 import java.time.Instant;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static br.com.yomigae.cloudstash.core.parser.ParserUtils.SaveFileAttribute;
 import static br.com.yomigae.cloudstash.core.parser.ParserUtils.saveFileAttribute;
+import static br.com.yomigae.cloudstash.core.util.FunctionUtils.toEnumMap;
+import static br.com.yomigae.cloudstash.core.util.FunctionUtils.with;
+import static com.google.common.collect.Maps.transformValues;
 
 public class V99CharacterParser extends VersionCharacterParser {
 
@@ -78,132 +83,133 @@ public class V99CharacterParser extends VersionCharacterParser {
     }
 
     @Override
-    protected void parseQuests(D2BinaryReader reader, ActMap<ActProgression.Builder<?, ?, ?>> progressions) {
+    protected void parseActs(D2BinaryReader reader, Builder character) {
+        Map<Difficulty, Character.Acts.Builder> all = toEnumMap(
+                Difficulty.class,
+                Difficulty.all(),
+                Character.Acts::builder);
+
         reader.find("Woo!".getBytes()).skipBytes(10);
         for (Difficulty difficulty : Difficulty.all()) {
-            progressions.get(difficulty, 0)
+            Character.Acts.Builder acts = all.get(difficulty);
+            acts.act1()
                     .visited(true)
                     .introduced(reader.readShort() > 0)
-                    .quests()
-                    .set(parseGenericQuest(reader, Quest.DEN_OF_EVIL))
-                    .set(parseGenericQuest(reader, Quest.SISTERS_BURIAL_GROUNDS))
-                    .set(parseGenericQuest(reader, Quest.TOOLS_OF_THE_TRADE))
-                    .set(parseGenericQuest(reader, Quest.THE_SEARCH_FOR_CAIN))
-                    .set(parseGenericQuest(reader, Quest.THE_FORGOTTEN_TOWER))
-                    .set(parseGenericQuest(reader, Quest.SISTERS_TO_THE_SLAUGHTER))
-                    .done();
-
-            progressions.get(difficulty, 1)
+                    .quests(ActStatus.Act1.Quests.builder()
+                            .denOfEvil(parseGenericQuest(reader, Quest.DEN_OF_EVIL))
+                            .sistersBurialGrounds(parseGenericQuest(reader, Quest.SISTERS_BURIAL_GROUNDS))
+                            .toolsOfTheTrade(parseGenericQuest(reader, Quest.TOOLS_OF_THE_TRADE))
+                            .theSearchForCain(parseGenericQuest(reader, Quest.THE_SEARCH_FOR_CAIN))
+                            .theForgottenTower(parseGenericQuest(reader, Quest.THE_FORGOTTEN_TOWER))
+                            .sistersToTheSlaughter(parseGenericQuest(reader, Quest.SISTERS_TO_THE_SLAUGHTER))
+                            .build());
+            acts.act2()
                     .visited(reader.readShort() > 0)
                     .introduced(reader.readShort() > 0)
-                    .quests()
-                    .set(parseGenericQuest(reader, Quest.RADAMENTS_LAIR))
-                    .set(parseGenericQuest(reader, Quest.THE_HORADRIC_STAFF))
-                    .set(parseGenericQuest(reader, Quest.TAINTED_SUN))
-                    .set(parseGenericQuest(reader, Quest.ARCANE_SANCTUARY))
-                    .set(parseGenericQuest(reader, Quest.THE_SUMMONER))
-                    .set(parseGenericQuest(reader, Quest.THE_SEVEN_TOMBS))
-                    .done();
-
-            progressions.get(difficulty, 2)
+                    .quests(ActStatus.Act2.Quests.builder()
+                            .radamentsLair(parseGenericQuest(reader, Quest.RADAMENTS_LAIR))
+                            .theHoradricStaff(parseGenericQuest(reader, Quest.THE_HORADRIC_STAFF))
+                            .taintedSun(parseGenericQuest(reader, Quest.TAINTED_SUN))
+                            .arcaneSanctuary(parseGenericQuest(reader, Quest.ARCANE_SANCTUARY))
+                            .theSummoner(parseGenericQuest(reader, Quest.THE_SUMMONER))
+                            .theSevenTombs(parseGenericQuest(reader, Quest.THE_SEVEN_TOMBS))
+                            .build());
+            acts.act3()
                     .visited(reader.readShort() > 0)
                     .introduced(reader.readShort() > 0)
-                    .quests()
-                    .set(parseGenericQuest(reader, Quest.LAM_ESENS_TOME))
-                    .set(parseGenericQuest(reader, Quest.KHALIMS_WILL))
-                    .set(parseGenericQuest(reader, Quest.BLADE_OF_THE_OLD_RELIGION))
-                    .set(parseGenericQuest(reader, Quest.THE_GOLDEN_BIRD))
-                    .set(parseGenericQuest(reader, Quest.THE_BLACKENED_TEMPLE))
-                    .set(parseGenericQuest(reader, Quest.THE_GUARDIAN))
-                    .done();
-
-            progressions.get(difficulty, 3)
+                    .quests(ActStatus.Act3.Quests.builder()
+                            .lamEsensTome(parseGenericQuest(reader, Quest.LAM_ESENS_TOME))
+                            .khalimsWill(parseGenericQuest(reader, Quest.KHALIMS_WILL))
+                            .bladeOfTheOldReligion(parseGenericQuest(reader, Quest.BLADE_OF_THE_OLD_RELIGION))
+                            .theGoldenBird(parseGenericQuest(reader, Quest.THE_GOLDEN_BIRD))
+                            .theBlackenedTemple(parseGenericQuest(reader, Quest.THE_BLACKENED_TEMPLE))
+                            .theGuardian(parseGenericQuest(reader, Quest.THE_GUARDIAN))
+                            .build());
+            acts.act4()
                     .visited(reader.readShort() > 0)
                     .introduced(reader.readShort() > 0)
-                    .quests()
-                    .set(parseGenericQuest(reader, Quest.THE_FALLEN_ANGEL))
-                    .set(parseGenericQuest(reader, Quest.HELLS_FORGE))
-                    .set(parseGenericQuest(reader, Quest.TERRORS_END))
-                    .done();
-
-            progressions.get(difficulty, 4)
+                    .quests(ActStatus.Act4.Quests.builder()
+                            .theFallenAngel(parseGenericQuest(reader, Quest.THE_FALLEN_ANGEL))
+                            .hellsForge(parseGenericQuest(reader, Quest.HELLS_FORGE))
+                            .terrorsEnd(parseGenericQuest(reader, Quest.TERRORS_END))
+                            .build());
+            acts.act5()
                     // TODO: Act 5 visited/introduced is always zero?
                     .visited(reader.skipBytes(6).readShort() > 0)
-                    .introduced(reader.readShort() > 0)
-                    .quests()
-                    .set(parseGenericQuest(reader.skipBytes(4), Quest.SIEGE_ON_HARROGATH))
-                    .set(parseGenericQuest(reader, Quest.RESCUE_ON_MOUNTAIN_ARREAT))
-                    .set(FunctionUtils.with(reader.readShort(), q -> QuestStatus.PrisonOfIce.builder()
+                    .quests(ActStatus.Act5.Quests.builder()
+                            .siegeOnHarrogath(parseGenericQuest(reader.skipBytes(4), Quest.SIEGE_ON_HARROGATH))
+                            .rescueOnMountainArreat(parseGenericQuest(reader, Quest.RESCUE_ON_MOUNTAIN_ARREAT))
+                            .prisonOfIce(with(reader.readShort(), q -> Quest.Act5.PrisonOfIce.Status.builder()
                                     .completed((q & 0x0001) > 0)
                                     // TODO: Figure out the actual bit
                                     .scrollConsumed((q & 0x0040) > 0))
-                            .build())
-                    .set(parseGenericQuest(reader, Quest.BETRAYAL_OF_HARROGATH))
-                    .set(parseGenericQuest(reader, Quest.RITE_OF_PASSAGE))
-                    .set(parseGenericQuest(reader, Quest.EVE_OF_DESTRUCTION))
-                    .done();
+                                    .build())
+                            .betrayalOfHarrogath(parseGenericQuest(reader, Quest.BETRAYAL_OF_HARROGATH))
+                            .riteOfPassage(parseGenericQuest(reader, Quest.RITE_OF_PASSAGE))
+                            .eveOfDestruction(parseGenericQuest(reader, Quest.EVE_OF_DESTRUCTION))
+                            .build());
             reader.skipBytes(14);
         }
-    }
 
-    @Override
-    protected void parseWaypoints(D2BinaryReader reader, ActMap<ActProgression.Builder<?, ?, ?>> progressions) {
         reader.find("WS".getBytes());
         reader.skipBytes(8);
         for (Difficulty difficulty : Difficulty.all()) {
+            Character.Acts.Builder acts = all.get(difficulty);
             reader.skipBytes(2);
             long data = reader.read(40);
-            progressions.get(difficulty, 0).waypoints()
-                    .set(Area.ROGUE_ENCAMPMENT, (data & 0x0000000001L) != 0)
-                    .set(Area.COLD_PLAINS, (data & 0x0000000002L) != 0)
-                    .set(Area.STONY_FIELD, (data & 0x0000000004L) != 0)
-                    .set(Area.DARK_WOOD, (data & 0x0000000008L) != 0)
-                    .set(Area.BLACK_MARSH, (data & 0x0000000010L) != 0)
-                    .set(Area.OUTER_CLOISTER, (data & 0x0000000020L) != 0)
-                    .set(Area.JAIL_LEVEL_1, (data & 0x0000000040L) != 0)
-                    .set(Area.INNER_CLOISTER, (data & 0x0000000080L) != 0)
-                    .set(Area.CATACOMBS_LEVEL_2, (data & 0x0000000100L) != 0)
-                    .done();
-            progressions.get(difficulty, 1).waypoints()
-                    .set(Area.LUT_GHOLEIN, (data & 0x0000000200L) != 0)
-                    .set(Area.LUT_GHOLEIN_SEWERS_LEVEL_2, (data & 0x0000000400L) != 0)
-                    .set(Area.DRY_HILLS, (data & 0x0000000800L) != 0)
-                    .set(Area.HALLS_OF_THE_DEAD_LEVEL_2, (data & 0x0000001000L) != 0)
-                    .set(Area.FAR_OASIS, (data & 0x0000002000L) != 0)
-                    .set(Area.LOST_CITY, (data & 0x0000004000L) != 0)
-                    .set(Area.PALACE_CELLAR_LEVEL_1, (data & 0x0000008000L) != 0)
-                    .set(Area.ARCANE_SANCTUARY, (data & 0x0000010000L) != 0)
-                    .set(Area.CANYON_OF_THE_MAGI, (data & 0x0000020000L) != 0)
-                    .done();
-            progressions.get(difficulty, 2).waypoints()
-                    .set(Area.KURAST_DOCKS, (data & 0x0000040000L) != 0)
-                    .set(Area.SPIDER_FOREST, (data & 0x0000080000L) != 0)
-                    .set(Area.GREAT_MARSH, (data & 0x0000100000L) != 0)
-                    .set(Area.FLAYER_JUNGLE, (data & 0x0000200000L) != 0)
-                    .set(Area.LOWER_KURAST, (data & 0x0000400000L) != 0)
-                    .set(Area.KURAST_BAZAAR, (data & 0x0000800000L) != 0)
-                    .set(Area.UPPER_KURAST, (data & 0x0001000000L) != 0)
-                    .set(Area.TRAVINCAL, (data & 0x0002000000L) != 0)
-                    .set(Area.DURANCE_OF_HATE_LEVEL_2, (data & 0x0004000000L) != 0)
-                    .done();
-            progressions.get(difficulty, 3).waypoints()
-                    .set(Area.THE_PANDEMONIUM_FORTRESS, (data & 0x0008000000L) != 0)
-                    .set(Area.CITY_OF_THE_DAMNED, (data & 0x0010000000L) != 0)
-                    .set(Area.RIVER_OF_FLAME, (data & 0x0020000000L) != 0)
-                    .done();
-            progressions.get(difficulty, 4).waypoints()
-                    .set(Area.HARROGATH, (data & 0x0040000000L) != 0)
-                    .set(Area.FRIGID_HIGHLANDS, (data & 0x0080000000L) != 0)
-                    .set(Area.ARREAT_PLATEAU, (data & 0x0100000000L) != 0)
-                    .set(Area.CRYSTALLINE_PASSAGE, (data & 0x0200000000L) != 0)
-                    .set(Area.HALLS_OF_PAIN, (data & 0x0400000000L) != 0)
-                    .set(Area.GLACIAL_TRAIL, (data & 0x0800000000L) != 0)
-                    .set(Area.FROZEN_TUNDRA, (data & 0x1000000000L) != 0)
-                    .set(Area.THE_ANCIENTS_WAY, (data & 0x2000000000L) != 0)
-                    .set(Area.WORLDSTONE_KEEP_LEVEL_2, (data & 0x4000000000L) != 0)
-                    .done();
+            acts.act1().waypoints(ActStatus.Act1.Waypoints.builder()
+                    .rogueEncampment((data & 0x0000000001L) != 0)
+                    .coldPlains((data & 0x0000000002L) != 0)
+                    .stonyField((data & 0x0000000004L) != 0)
+                    .darkWood((data & 0x0000000008L) != 0)
+                    .blackMarsh((data & 0x0000000010L) != 0)
+                    .outerCloister((data & 0x0000000020L) != 0)
+                    .jail((data & 0x0000000040L) != 0)
+                    .innerCloister((data & 0x0000000080L) != 0)
+                    .catacombs((data & 0x0000000100L) != 0)
+                    .build());
+            acts.act2().waypoints(ActStatus.Act2.Waypoints.builder()
+                    .lutGholein((data & 0x0000000200L) != 0)
+                    .sewers((data & 0x0000000400L) != 0)
+                    .dryHills((data & 0x0000000800L) != 0)
+                    .hallsOfTheDead((data & 0x0000001000L) != 0)
+                    .farOasis((data & 0x0000002000L) != 0)
+                    .lostCity((data & 0x0000004000L) != 0)
+                    .palaceCellar((data & 0x0000008000L) != 0)
+                    .arcaneSanctuary((data & 0x0000010000L) != 0)
+                    .canyonOfTheMagi((data & 0x0000020000L) != 0)
+                    .build());
+            acts.act3().waypoints(ActStatus.Act3.Waypoints.builder()
+                    .kurastDocks((data & 0x0000040000L) != 0)
+                    .spiderForest((data & 0x0000080000L) != 0)
+                    .greatMarsh((data & 0x0000100000L) != 0)
+                    .flayerJungle((data & 0x0000200000L) != 0)
+                    .lowerKurast((data & 0x0000400000L) != 0)
+                    .kurastBazaar((data & 0x0000800000L) != 0)
+                    .upperKurast((data & 0x0001000000L) != 0)
+                    .travincal((data & 0x0002000000L) != 0)
+                    .duranceOfHate((data & 0x0004000000L) != 0)
+                    .build());
+            acts.act4().waypoints(ActStatus.Act4.Waypoints.builder()
+                    .thePandemoniumFortress((data & 0x0008000000L) != 0)
+                    .cityOfTheDamned((data & 0x0010000000L) != 0)
+                    .riverOfFlame((data & 0x0020000000L) != 0)
+                    .build());
+            acts.act5().waypoints(ActStatus.Act5.Waypoints.builder()
+                    .harrogath((data & 0x0040000000L) != 0)
+                    .frigidHighlands((data & 0x0080000000L) != 0)
+                    .arreatPlateau((data & 0x0100000000L) != 0)
+                    .crystallinePassage((data & 0x0200000000L) != 0)
+                    .hallsOfPain((data & 0x0400000000L) != 0)
+                    .glacialTrail((data & 0x0800000000L) != 0)
+                    .frozenTundra((data & 0x1000000000L) != 0)
+                    .theAncientsWay((data & 0x2000000000L) != 0)
+                    .worldstoneKeep((data & 0x4000000000L) != 0)
+                    .build());
             reader.skipBytes(17);
         }
+
+        character.acts(new EnumMap<>(transformValues(all, Character.Acts.Builder::build)));
     }
 
     @Override
@@ -219,6 +225,6 @@ public class V99CharacterParser extends VersionCharacterParser {
     }
 
     private static QuestStatus.Generic parseGenericQuest(D2BinaryReader reader, Quest quest) {
-        return new QuestStatus.Generic(quest, (reader.readShort() & 0x0001) == 1);
+        return new QuestStatus.Generic((reader.readShort() & 0x0001) == 1);
     }
 }

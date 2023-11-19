@@ -1,10 +1,8 @@
 package br.com.yomigae.cloudstash.core.parser;
 
 import br.com.yomigae.cloudstash.core.io.D2BinaryReader;
-import br.com.yomigae.cloudstash.core.model.ActMap;
 import br.com.yomigae.cloudstash.core.model.character.Character;
 import br.com.yomigae.cloudstash.core.model.character.Character.Builder;
-import br.com.yomigae.cloudstash.core.model.progression.ActProgression;
 
 import java.util.Map;
 
@@ -42,12 +40,7 @@ public class DelegatingCharacterParser extends CharacterParser {
     }
 
     @Override
-    protected void parseQuests(D2BinaryReader reader, ActMap<ActProgression.Builder<?, ?, ?>> progressions) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected void parseWaypoints(D2BinaryReader reader, ActMap<ActProgression.Builder<?, ?, ?>> progressions) {
+    protected void parseActs(D2BinaryReader reader, Builder character) {
         throw new UnsupportedOperationException();
     }
 }

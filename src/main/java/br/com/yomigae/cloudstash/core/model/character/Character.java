@@ -2,8 +2,9 @@ package br.com.yomigae.cloudstash.core.model.character;
 
 import br.com.yomigae.cloudstash.core.model.*;
 import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
-import br.com.yomigae.cloudstash.core.model.progression.*;
+import br.com.yomigae.cloudstash.core.model.acts.ActStatus;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Singular;
 
 import java.time.Instant;
@@ -32,14 +33,16 @@ public record Character(
         List<Skill> skillHotkeys,
 
         Hireling hireling,
-        DifficultyMap<Progression> progression,
+
+        @Singular("acts")
+        Map<Difficulty, Acts> acts,
 
         @Singular
         Map<Attribute, Integer> attributes) {
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
         Character character = (Character) o;
         return ladder == character.ladder
                 && expansion == character.expansion
@@ -53,13 +56,13 @@ public record Character(
                 && mouseSkill.equals(character.mouseSkill)
                 && skillHotkeys.equals(character.skillHotkeys)
                 && Objects.equals(hireling, character.hireling)
-                && progression.equals(character.progression)
+                && acts.equals(character.acts)
                 && attributes.equals(character.attributes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, klass, ladder, expansion, hardcore, level, currentAct, dead, activeEquipmentSet, mouseSkill, skillHotkeys, hireling, progression, attributes);
+        return Objects.hash(name, klass, ladder, expansion, hardcore, level, currentAct, dead, activeEquipmentSet, mouseSkill, skillHotkeys, hireling, acts, attributes);
     }
 
     @Override
@@ -74,7 +77,7 @@ public record Character(
                 .append("\n").append("Current act: ").append(currentAct)
                 .append("\n").append("Last played: ").append(lastPlayed);
 
-        progression.forEach((difficulty, quests) -> string
+        acts.forEach((difficulty, quests) -> string
                 .append("\n\n").append(difficulty)
                 .append("\n").append(divider(SINGLE))
                 .append(quests));
@@ -95,19 +98,22 @@ public record Character(
         return string.toString();
     }
 
-    public Progression progression(Difficulty difficulty) {
-        return progression.get(difficulty);
+    public Acts progression(Difficulty difficulty) {
+        return acts.get(difficulty);
     }
 
-    @lombok.Builder
-    public record Progression(
-            Act1Progression act1,
-            Act2Progression act2,
-            Act3Progression act3,
-            Act4Progression act4,
-            Act5Progression act5) {
+    public record Acts(
+            ActStatus.Act1 act1,
+            ActStatus.Act2 act2,
+            ActStatus.Act3 act3,
+            ActStatus.Act4 act4,
+            ActStatus.Act5 act5) {
 
-        List<ActProgression<?, ?>> acts() {
+        public static Builder builder(Difficulty difficulty) {
+            return new Builder(difficulty);
+        }
+
+        List<ActStatus<?, ?>> acts() {
             return List.of(act1, act2, act3, act4, act5);
         }
 
@@ -118,16 +124,29 @@ public record Character(
             return string.toString();
         }
 
-        public static class Builder {
-            public Builder set(ActProgression<?, ?> status) {
-                return switch (status.act().number()) {
-                    case 0 -> act1((Act1Progression) status);
-                    case 1 -> act2((Act2Progression) status);
-                    case 2 -> act3((Act3Progression) status);
-                    case 3 -> act4((Act4Progression) status);
-                    case 4 -> act5((Act5Progression) status);
-                    default -> throw new IllegalArgumentException("Invalid act: " + status.act());
-                };
+        @Getter
+        public static final class Builder {
+            private final ActStatus.Act1.Builder act1;
+            private final ActStatus.Act2.Builder act2;
+            private final ActStatus.Act3.Builder act3;
+            private final ActStatus.Act4.Builder act4;
+            private final ActStatus.Act5.Builder act5;
+
+            public Builder(Difficulty difficulty) {
+                this.act1 = ActStatus.Act1.builder().difficulty(difficulty);
+                this.act2 = ActStatus.Act2.builder().difficulty(difficulty);
+                this.act3 = ActStatus.Act3.builder().difficulty(difficulty);
+                this.act4 = ActStatus.Act4.builder().difficulty(difficulty);
+                this.act5 = ActStatus.Act5.builder().difficulty(difficulty);
+            }
+
+            public Acts build() {
+                return new Acts(
+                        act1.build(),
+                        act2.build(),
+                        act3.build(),
+                        act4.build(),
+                        act5.build());
             }
         }
     }

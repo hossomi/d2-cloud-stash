@@ -1,9 +1,10 @@
-package br.com.yomigae.cloudstash.core.model.progression.quest;
+package br.com.yomigae.cloudstash.core.model.acts;
 
 import br.com.yomigae.cloudstash.core.io.D2Strings.D2String;
-import br.com.yomigae.cloudstash.core.model.progression.quest.QuestStatus.Generic;
+import br.com.yomigae.cloudstash.core.model.acts.QuestStatus.Generic;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
@@ -52,7 +53,7 @@ public sealed abstract class Quest<S extends QuestStatus> {
         return name;
     }
 
-    static sealed abstract class Act1<S extends QuestStatus> extends Quest<S> {
+    public static sealed abstract class Act1<S extends QuestStatus> extends Quest<S> {
         public Act1(D2String name) { super(name.toString(), 0); }
 
         public static final class DenOfEvil extends Act1<Generic> {
@@ -80,7 +81,7 @@ public sealed abstract class Quest<S extends QuestStatus> {
         }
     }
 
-    static sealed abstract class Act2<S extends QuestStatus> extends Quest<S> {
+    public static sealed abstract class Act2<S extends QuestStatus> extends Quest<S> {
         public Act2(D2String name) { super(name.toString(), 1); }
 
         public static final class RadamentsLair extends Act2<Generic> {
@@ -108,7 +109,7 @@ public sealed abstract class Quest<S extends QuestStatus> {
         }
     }
 
-    static sealed abstract class Act3<S extends QuestStatus> extends Quest<S> {
+    public static sealed abstract class Act3<S extends QuestStatus> extends Quest<S> {
         public Act3(D2String name) { super(name.toString(), 2); }
 
         public static final class TheGoldenBird extends Act3<Generic> {
@@ -136,7 +137,7 @@ public sealed abstract class Quest<S extends QuestStatus> {
         }
     }
 
-    static sealed abstract class Act4<S extends QuestStatus> extends Quest<S> {
+    public static sealed abstract class Act4<S extends QuestStatus> extends Quest<S> {
         public Act4(D2String name) { super(name.toString(), 3); }
 
         public static final class TheFallenAngel extends Act4<Generic> {
@@ -152,7 +153,7 @@ public sealed abstract class Quest<S extends QuestStatus> {
         }
     }
 
-    static sealed abstract class Act5<S extends QuestStatus> extends Quest<S> {
+    public static sealed abstract class Act5<S extends QuestStatus> extends Quest<S> {
         public Act5(D2String name) { super(name.toString(), 4); }
 
         public static final class SiegeOnHarrogath extends Act5<Generic> {
@@ -162,6 +163,7 @@ public sealed abstract class Quest<S extends QuestStatus> {
         public static final class PrisonOfIce extends Act5<PrisonOfIce.Status> {
             private PrisonOfIce() { super(d2String("qstsa5q3")); }
 
+            @Builder
             public record Status(boolean completed, boolean scrollConsumed) implements QuestStatus { }
         }
 

@@ -1,19 +1,13 @@
 package br.com.yomigae.cloudstash.core.parser;
 
 import br.com.yomigae.cloudstash.core.io.D2BinaryReader;
-import br.com.yomigae.cloudstash.core.model.ActMap;
-import br.com.yomigae.cloudstash.core.model.Difficulty;
-import br.com.yomigae.cloudstash.core.model.DifficultyMap;
 import br.com.yomigae.cloudstash.core.model.character.Character;
 import br.com.yomigae.cloudstash.core.model.character.Character.Builder;
-import br.com.yomigae.cloudstash.core.model.progression.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.stream.Collector;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.groupingBy;
 
 public abstract class CharacterParser {
 
@@ -55,7 +49,7 @@ public abstract class CharacterParser {
 
         Builder character = Character.builder();
         parseHeader(reader, character);
-        parseProgression(reader, character);
+        parseActs(reader, character);
         parseAttributes(reader, character);
         return character.build();
     }
@@ -64,32 +58,7 @@ public abstract class CharacterParser {
 
     protected abstract void parseHeader(D2BinaryReader reader, Builder character);
 
-    protected void parseProgression(D2BinaryReader reader, Builder character) {
-        ActMap<ActProgression.Builder<?, ?, ?>> actProgression = new ActMap<>();
-        Difficulty.all().forEach(difficulty -> {
-            actProgression.put(difficulty, 0, Act1Progression.builder().difficulty(difficulty));
-            actProgression.put(difficulty, 1, Act2Progression.builder().difficulty(difficulty));
-            actProgression.put(difficulty, 2, Act3Progression.builder().difficulty(difficulty));
-            actProgression.put(difficulty, 3, Act4Progression.builder().difficulty(difficulty));
-            actProgression.put(difficulty, 4, Act5Progression.builder().difficulty(difficulty));
-        });
-
-        parseQuests(reader, actProgression);
-        parseWaypoints(reader, actProgression);
-
-        character.progression(actProgression.values().stream()
-                .map(ActProgression.Builder::build)
-                .collect(groupingBy(a -> a.act().difficulty(),
-                        DifficultyMap::new,
-                        Collector.of(Character.Progression::builder,
-                                Character.Progression.Builder::set,
-                                (a, b) -> {throw new RuntimeException();},
-                                Character.Progression.Builder::build))));
-    }
-
-    protected abstract void parseQuests(D2BinaryReader reader, ActMap<ActProgression.Builder<?, ?, ?>> progressions);
-
-    protected abstract void parseWaypoints(D2BinaryReader reader, ActMap<ActProgression.Builder<?, ?, ?>> progressions);
+    protected abstract void parseActs(D2BinaryReader reader, Builder character);
 
     protected abstract void parseAttributes(D2BinaryReader reader, Builder character);
 }

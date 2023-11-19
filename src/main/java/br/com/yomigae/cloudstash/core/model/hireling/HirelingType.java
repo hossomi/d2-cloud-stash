@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static br.com.yomigae.cloudstash.core.model.Attribute.*;
-import static br.com.yomigae.cloudstash.core.util.ValidationUtil.throwOnNull;
+import static br.com.yomigae.cloudstash.core.util.ValidationUtils.throwOnNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;

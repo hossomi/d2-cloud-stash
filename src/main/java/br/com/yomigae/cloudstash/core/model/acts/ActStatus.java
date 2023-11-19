@@ -1,22 +1,27 @@
-package br.com.yomigae.cloudstash.core.model.progression.quest;
+package br.com.yomigae.cloudstash.core.model.acts;
 
 import br.com.yomigae.cloudstash.core.model.Act;
 import br.com.yomigae.cloudstash.core.model.Area;
 import br.com.yomigae.cloudstash.core.model.Difficulty;
-import br.com.yomigae.cloudstash.core.model.progression.quest.QuestStatus.Generic;
+import br.com.yomigae.cloudstash.core.model.acts.QuestStatus.Generic;
+import com.google.common.collect.ImmutableMap;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static br.com.yomigae.cloudstash.core.util.StringUtils.checkbox;
+import static br.com.yomigae.cloudstash.core.util.StringUtils.list;
 import static java.lang.String.format;
 
 @Getter
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public abstract class ActStatus<
+public abstract sealed class ActStatus<
         Q extends ActStatus.Quests,
         W extends ActStatus.Waypoints> {
 
@@ -26,7 +31,15 @@ public abstract class ActStatus<
     Q quests;
     W waypoints;
 
-    public abstract static class Quests {
+    @Override
+    public String toString() {
+        return list(
+                checkbox(act.toString().toUpperCase(), visited()),
+                List.of(quests.toString(), waypoints.toString()));
+    }
+
+
+    public abstract sealed static class Quests {
 
         public <Q extends Quest<S>, S extends QuestStatus> S get(Q quest) {
             return tryGet(quest).orElseThrow(() -> new IllegalArgumentException(format(
@@ -36,7 +49,16 @@ public abstract class ActStatus<
 
         protected abstract <Q extends Quest<S>, S extends QuestStatus> Optional<S> tryGet(Q quest);
 
-        public abstract static class Builder<B extends Builder<B>> {
+        public abstract Map<Quest<?>, QuestStatus> all();
+
+        @Override
+        public String toString() {
+            return list("Quests", all().entrySet().stream()
+                    .map(e -> checkbox(e.getKey().name(), e.getValue().completed()))
+                    .toList());
+        }
+
+        public abstract sealed static class Builder<B extends Builder<B>> {
 
             public <Q extends Quest<S>, S extends QuestStatus> B set(Q quest, S status) {
                 return trySet(quest, status).orElseThrow(() -> new IllegalArgumentException(format(
@@ -48,7 +70,7 @@ public abstract class ActStatus<
         }
     }
 
-    public abstract static class Waypoints {
+    public abstract sealed static class Waypoints {
 
         public boolean get(Area area) {
             return tryGet(area).orElseThrow(() -> new IllegalArgumentException(format(
@@ -58,7 +80,16 @@ public abstract class ActStatus<
 
         protected abstract Optional<Boolean> tryGet(Area area);
 
-        public abstract static class Builder<B extends Builder<B>> {
+        public abstract Map<Area, Boolean> all();
+
+        @Override
+        public String toString() {
+            return list("Waypoints", all().entrySet().stream()
+                    .map(e -> checkbox(e.getKey().label(), e.getValue()))
+                    .toList());
+        }
+
+        public abstract sealed static class Builder<B extends Builder<B>> {
 
             public B set(Area area, boolean active) {
                 return trySet(area, active).orElseThrow(() -> new IllegalArgumentException(format(
@@ -70,16 +101,15 @@ public abstract class ActStatus<
         }
     }
 
-    public abstract static class Builder<
+    public abstract sealed static class Builder<
             Q extends Quests.Builder<Q>,
             W extends Waypoints.Builder<W>,
             B extends Builder<Q, W, B>> {
-
     }
 
     // ==================================================
 
-    public static class Act1 extends ActStatus<Act1.Quests, Act1.Waypoints> {
+    public static final class Act1 extends ActStatus<Act1.Quests, Act1.Waypoints> {
 
         @lombok.Builder
         public Act1(Difficulty difficulty, boolean visited, boolean introduced,
@@ -90,7 +120,7 @@ public abstract class ActStatus<
         @lombok.Builder
         @Getter
         @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-        public static class Quests extends ActStatus.Quests {
+        public static final class Quests extends ActStatus.Quests {
 
             Generic denOfEvil;
             Generic sistersBurialGrounds;
@@ -103,17 +133,29 @@ public abstract class ActStatus<
             @SuppressWarnings({"unchecked", "unused"})
             public <Q extends Quest<S>, S extends QuestStatus> Optional<S> tryGet(Q quest) {
                 return Optional.ofNullable(switch (quest) {
-                    case Quest.Act1.DenOfEvil q -> (S) denOfEvil();
-                    case Quest.Act1.SistersBurialGrounds q -> (S) sistersBurialGrounds();
-                    case Quest.Act1.TheSearchForCain q -> (S) theSearchForCain();
-                    case Quest.Act1.TheForgottenTower q -> (S) theForgottenTower();
-                    case Quest.Act1.ToolsOfTheTrade q -> (S) toolsOfTheTrade();
-                    case Quest.Act1.SistersToTheSlaughter q -> (S) sistersToTheSlaughter();
+                    case Quest.Act1.DenOfEvil q -> (S) denOfEvil;
+                    case Quest.Act1.SistersBurialGrounds q -> (S) sistersBurialGrounds;
+                    case Quest.Act1.TheSearchForCain q -> (S) theSearchForCain;
+                    case Quest.Act1.TheForgottenTower q -> (S) theForgottenTower;
+                    case Quest.Act1.ToolsOfTheTrade q -> (S) toolsOfTheTrade;
+                    case Quest.Act1.SistersToTheSlaughter q -> (S) sistersToTheSlaughter;
                     default -> null;
                 });
             }
 
-            public static class Builder extends ActStatus.Quests.Builder<Act1.Quests.Builder> {
+            @Override
+            public Map<Quest<?>, QuestStatus> all() {
+                return new ImmutableMap.Builder<Quest<?>, QuestStatus>()
+                        .put(Quest.DEN_OF_EVIL, denOfEvil)
+                        .put(Quest.SISTERS_BURIAL_GROUNDS, sistersBurialGrounds)
+                        .put(Quest.THE_SEARCH_FOR_CAIN, theSearchForCain)
+                        .put(Quest.THE_FORGOTTEN_TOWER, theForgottenTower)
+                        .put(Quest.TOOLS_OF_THE_TRADE, toolsOfTheTrade)
+                        .put(Quest.SISTERS_TO_THE_SLAUGHTER, sistersToTheSlaughter)
+                        .build();
+            }
+
+            public static final class Builder extends ActStatus.Quests.Builder<Act1.Quests.Builder> {
                 @Override
                 @SuppressWarnings("unused")
                 protected <Q extends Quest<S>, S extends QuestStatus> Optional<Builder> trySet(Q quest, S status) {
@@ -134,7 +176,7 @@ public abstract class ActStatus<
         @lombok.Builder
         @Getter
         @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-        public static class Waypoints extends ActStatus.Waypoints {
+        public static final class Waypoints extends ActStatus.Waypoints {
 
             boolean rogueEncampment;
             boolean coldPlains;
@@ -162,7 +204,22 @@ public abstract class ActStatus<
                 });
             }
 
-            public static class Builder extends ActStatus.Waypoints.Builder<Act1.Waypoints.Builder> {
+            @Override
+            public Map<Area, Boolean> all() {
+                return new ImmutableMap.Builder<Area, Boolean>()
+                        .put(Area.ROGUE_ENCAMPMENT, rogueEncampment)
+                        .put(Area.COLD_PLAINS, coldPlains)
+                        .put(Area.STONY_FIELD, stonyField)
+                        .put(Area.DARK_WOOD, darkWood)
+                        .put(Area.BLACK_MARSH, blackMarsh)
+                        .put(Area.OUTER_CLOISTER, outerCloister)
+                        .put(Area.JAIL_LEVEL_1, jail)
+                        .put(Area.INNER_CLOISTER, innerCloister)
+                        .put(Area.CATACOMBS_LEVEL_2, catacombs)
+                        .build();
+            }
+
+            public static final class Builder extends ActStatus.Waypoints.Builder<Act1.Waypoints.Builder> {
                 @Override
                 protected Optional<Builder> trySet(Area area, boolean active) {
                     return Optional.ofNullable(switch (area) {
@@ -181,12 +238,10 @@ public abstract class ActStatus<
             }
         }
 
-        public static class Builder extends ActStatus.Builder<Quests.Builder, Waypoints.Builder, Builder> {
-
-        }
+        public static final class Builder extends ActStatus.Builder<Quests.Builder, Waypoints.Builder, Builder> { }
     }
 
-    public static class Act2 extends ActStatus<Act2.Quests, Act2.Waypoints> {
+    public static final class Act2 extends ActStatus<Act2.Quests, Act2.Waypoints> {
 
         @lombok.Builder
         public Act2(Difficulty difficulty, boolean visited, boolean introduced,
@@ -197,7 +252,7 @@ public abstract class ActStatus<
         @lombok.Builder
         @Getter
         @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-        public static class Quests extends ActStatus.Quests {
+        public static final class Quests extends ActStatus.Quests {
 
             Generic radamentsLair;
             Generic theHoradricStaff;
@@ -220,7 +275,19 @@ public abstract class ActStatus<
                 });
             }
 
-            public static class Builder extends ActStatus.Quests.Builder<Act2.Quests.Builder> {
+            @Override
+            public Map<Quest<?>, QuestStatus> all() {
+                return new ImmutableMap.Builder<Quest<?>, QuestStatus>()
+                        .put(Quest.RADAMENTS_LAIR, radamentsLair)
+                        .put(Quest.THE_HORADRIC_STAFF, theHoradricStaff)
+                        .put(Quest.TAINTED_SUN, taintedSun)
+                        .put(Quest.ARCANE_SANCTUARY, arcaneSanctuary)
+                        .put(Quest.THE_SUMMONER, theSummoner)
+                        .put(Quest.THE_SEVEN_TOMBS, theSevenTombs)
+                        .build();
+            }
+
+            public static final class Builder extends ActStatus.Quests.Builder<Act2.Quests.Builder> {
                 @Override
                 @SuppressWarnings("unused")
                 protected <Q extends Quest<S>, S extends QuestStatus> Optional<Act2.Quests.Builder> trySet(Q quest, S status) {
@@ -240,7 +307,7 @@ public abstract class ActStatus<
         @lombok.Builder
         @Getter
         @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-        public static class Waypoints extends ActStatus.Waypoints {
+        public static final class Waypoints extends ActStatus.Waypoints {
 
             boolean lutGholein;
             boolean sewers;
@@ -248,27 +315,42 @@ public abstract class ActStatus<
             boolean hallsOfTheDead;
             boolean farOasis;
             boolean lostCity;
-            boolean pallaceCellar;
+            boolean palaceCellar;
             boolean arcaneSanctuary;
             boolean canyonOfTheMagi;
 
             @Override
             public Optional<Boolean> tryGet(Area area) {
                 return Optional.ofNullable(switch (area) {
-                    case LUT_GHOLEIN -> lutGholein();
-                    case LUT_GHOLEIN_SEWERS_LEVEL_2 -> sewers();
-                    case DRY_HILLS -> dryHills();
-                    case HALLS_OF_THE_DEAD_LEVEL_2 -> hallsOfTheDead();
-                    case FAR_OASIS -> farOasis();
-                    case LOST_CITY -> lostCity();
-                    case PALACE_CELLAR_LEVEL_1 -> pallaceCellar();
-                    case ARCANE_SANCTUARY -> arcaneSanctuary();
-                    case CANYON_OF_THE_MAGI -> canyonOfTheMagi();
+                    case LUT_GHOLEIN -> lutGholein;
+                    case LUT_GHOLEIN_SEWERS_LEVEL_2 -> sewers;
+                    case DRY_HILLS -> dryHills;
+                    case HALLS_OF_THE_DEAD_LEVEL_2 -> hallsOfTheDead;
+                    case FAR_OASIS -> farOasis;
+                    case LOST_CITY -> lostCity;
+                    case PALACE_CELLAR_LEVEL_1 -> palaceCellar;
+                    case ARCANE_SANCTUARY -> arcaneSanctuary;
+                    case CANYON_OF_THE_MAGI -> canyonOfTheMagi;
                     default -> null;
                 });
             }
 
-            public static class Builder extends ActStatus.Waypoints.Builder<Act2.Waypoints.Builder> {
+            @Override
+            public Map<Area, Boolean> all() {
+                return new ImmutableMap.Builder<Area, Boolean>()
+                        .put(Area.LUT_GHOLEIN, lutGholein)
+                        .put(Area.LUT_GHOLEIN_SEWERS_LEVEL_2, sewers)
+                        .put(Area.DRY_HILLS, dryHills)
+                        .put(Area.HALLS_OF_THE_DEAD_LEVEL_2, hallsOfTheDead)
+                        .put(Area.FAR_OASIS, farOasis)
+                        .put(Area.LOST_CITY, lostCity)
+                        .put(Area.PALACE_CELLAR_LEVEL_1, palaceCellar)
+                        .put(Area.ARCANE_SANCTUARY, arcaneSanctuary)
+                        .put(Area.CANYON_OF_THE_MAGI, canyonOfTheMagi)
+                        .build();
+            }
+
+            public static final class Builder extends ActStatus.Waypoints.Builder<Act2.Waypoints.Builder> {
                 @Override
                 protected Optional<Act2.Waypoints.Builder> trySet(Area area, boolean active) {
                     return Optional.ofNullable(switch (area) {
@@ -278,7 +360,7 @@ public abstract class ActStatus<
                         case HALLS_OF_THE_DEAD_LEVEL_2 -> hallsOfTheDead(active);
                         case FAR_OASIS -> farOasis(active);
                         case LOST_CITY -> lostCity(active);
-                        case PALACE_CELLAR_LEVEL_1 -> pallaceCellar(active);
+                        case PALACE_CELLAR_LEVEL_1 -> palaceCellar(active);
                         case ARCANE_SANCTUARY -> arcaneSanctuary(active);
                         case CANYON_OF_THE_MAGI -> canyonOfTheMagi(active);
                         default -> null;
@@ -287,12 +369,10 @@ public abstract class ActStatus<
             }
         }
 
-        public static class Builder extends ActStatus.Builder<Quests.Builder, Waypoints.Builder, Builder> {
-
-        }
+        public static final class Builder extends ActStatus.Builder<Quests.Builder, Waypoints.Builder, Builder> { }
     }
 
-    public static class Act3 extends ActStatus<Act3.Quests, Act3.Waypoints> {
+    public static final class Act3 extends ActStatus<Act3.Quests, Act3.Waypoints> {
 
         @lombok.Builder
         public Act3(Difficulty difficulty, boolean visited, boolean introduced,
@@ -303,7 +383,7 @@ public abstract class ActStatus<
         @lombok.Builder
         @Getter
         @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-        public static class Quests extends ActStatus.Quests {
+        public static final class Quests extends ActStatus.Quests {
 
             Generic theGoldenBird;
             Generic bladeOfTheOldReligion;
@@ -326,7 +406,19 @@ public abstract class ActStatus<
                 });
             }
 
-            public static class Builder extends ActStatus.Quests.Builder<Act3.Quests.Builder> {
+            @Override
+            public Map<Quest<?>, QuestStatus> all() {
+                return new ImmutableMap.Builder<Quest<?>, QuestStatus>()
+                        .put(Quest.THE_GOLDEN_BIRD, theGoldenBird)
+                        .put(Quest.BLADE_OF_THE_OLD_RELIGION, bladeOfTheOldReligion)
+                        .put(Quest.KHALIMS_WILL, khalimsWill)
+                        .put(Quest.LAM_ESENS_TOME, lamEsensTome)
+                        .put(Quest.THE_BLACKENED_TEMPLE, theBlackenedTemple)
+                        .put(Quest.THE_GUARDIAN, theGuardian)
+                        .build();
+            }
+
+            public static final class Builder extends ActStatus.Quests.Builder<Act3.Quests.Builder> {
                 @Override
                 @SuppressWarnings("unused")
                 protected <Q extends Quest<S>, S extends QuestStatus> Optional<Act3.Quests.Builder> trySet(Q quest, S status) {
@@ -346,7 +438,7 @@ public abstract class ActStatus<
         @lombok.Builder
         @Getter
         @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-        public static class Waypoints extends ActStatus.Waypoints {
+        public static final class Waypoints extends ActStatus.Waypoints {
 
             boolean kurastDocks;
             boolean spiderForest;
@@ -361,20 +453,35 @@ public abstract class ActStatus<
             @Override
             public Optional<Boolean> tryGet(Area area) {
                 return Optional.ofNullable(switch (area) {
-                    case KURAST_DOCKS -> kurastDocks();
-                    case SPIDER_FOREST -> spiderForest();
-                    case GREAT_MARSH -> greatMarsh();
-                    case FLAYER_JUNGLE -> flayerJungle();
-                    case LOWER_KURAST -> lowerKurast();
-                    case KURAST_BAZAAR -> kurastBazaar();
-                    case UPPER_KURAST -> upperKurast();
-                    case TRAVINCAL -> travincal();
-                    case DURANCE_OF_HATE_LEVEL_2 -> duranceOfHate();
+                    case KURAST_DOCKS -> kurastDocks;
+                    case SPIDER_FOREST -> spiderForest;
+                    case GREAT_MARSH -> greatMarsh;
+                    case FLAYER_JUNGLE -> flayerJungle;
+                    case LOWER_KURAST -> lowerKurast;
+                    case KURAST_BAZAAR -> kurastBazaar;
+                    case UPPER_KURAST -> upperKurast;
+                    case TRAVINCAL -> travincal;
+                    case DURANCE_OF_HATE_LEVEL_2 -> duranceOfHate;
                     default -> null;
                 });
             }
 
-            public static class Builder extends ActStatus.Waypoints.Builder<Act3.Waypoints.Builder> {
+            @Override
+            public Map<Area, Boolean> all() {
+                return new ImmutableMap.Builder<Area, Boolean>()
+                        .put(Area.KURAST_DOCKS, kurastDocks)
+                        .put(Area.SPIDER_FOREST, spiderForest)
+                        .put(Area.GREAT_MARSH, greatMarsh)
+                        .put(Area.FLAYER_JUNGLE, flayerJungle)
+                        .put(Area.LOWER_KURAST, lowerKurast)
+                        .put(Area.KURAST_BAZAAR, kurastBazaar)
+                        .put(Area.UPPER_KURAST, upperKurast)
+                        .put(Area.TRAVINCAL, travincal)
+                        .put(Area.DURANCE_OF_HATE_LEVEL_2, duranceOfHate)
+                        .build();
+            }
+
+            public static final class Builder extends ActStatus.Waypoints.Builder<Act3.Waypoints.Builder> {
                 @Override
                 protected Optional<Act3.Waypoints.Builder> trySet(Area area, boolean active) {
                     return Optional.ofNullable(switch (area) {
@@ -393,12 +500,10 @@ public abstract class ActStatus<
             }
         }
 
-        public static class Builder extends ActStatus.Builder<Quests.Builder, Waypoints.Builder, Builder> {
-
-        }
+        public static final class Builder extends ActStatus.Builder<Quests.Builder, Waypoints.Builder, Builder> { }
     }
 
-    public static class Act4 extends ActStatus<Act4.Quests, Act4.Waypoints> {
+    public static final class Act4 extends ActStatus<Act4.Quests, Act4.Waypoints> {
 
         @lombok.Builder
         public Act4(Difficulty difficulty, boolean visited, boolean introduced,
@@ -409,7 +514,7 @@ public abstract class ActStatus<
         @lombok.Builder
         @Getter
         @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-        public static class Quests extends ActStatus.Quests {
+        public static final class Quests extends ActStatus.Quests {
 
             Generic theFallenAngel;
             Generic hellsForge;
@@ -419,14 +524,23 @@ public abstract class ActStatus<
             @SuppressWarnings({"unchecked", "unused"})
             public <Q extends Quest<S>, S extends QuestStatus> Optional<S> tryGet(Q quest) {
                 return Optional.ofNullable(switch (quest) {
-                    case Quest.Act4.TheFallenAngel q -> (S) theFallenAngel();
-                    case Quest.Act4.HellsForge q -> (S) hellsForge();
-                    case Quest.Act4.TerrorsEnd q -> (S) terrorsEnd();
+                    case Quest.Act4.TheFallenAngel q -> (S) theFallenAngel;
+                    case Quest.Act4.HellsForge q -> (S) hellsForge;
+                    case Quest.Act4.TerrorsEnd q -> (S) terrorsEnd;
                     default -> null;
                 });
             }
 
-            public static class Builder extends ActStatus.Quests.Builder<Act4.Quests.Builder> {
+            @Override
+            public Map<Quest<?>, QuestStatus> all() {
+                return new ImmutableMap.Builder<Quest<?>, QuestStatus>()
+                        .put(Quest.THE_FALLEN_ANGEL, theFallenAngel)
+                        .put(Quest.HELLS_FORGE, hellsForge)
+                        .put(Quest.TERRORS_END, terrorsEnd)
+                        .build();
+            }
+
+            public static final class Builder extends ActStatus.Quests.Builder<Act4.Quests.Builder> {
                 @Override
                 @SuppressWarnings("unused")
                 protected <Q extends Quest<S>, S extends QuestStatus> Optional<Act4.Quests.Builder> trySet(Q quest, S status) {
@@ -443,27 +557,36 @@ public abstract class ActStatus<
         @lombok.Builder
         @Getter
         @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-        public static class Waypoints extends ActStatus.Waypoints {
+        public static final class Waypoints extends ActStatus.Waypoints {
 
-            boolean pandemoniumFortress;
+            boolean thePandemoniumFortress;
             boolean cityOfTheDamned;
             boolean riverOfFlame;
 
             @Override
             public Optional<Boolean> tryGet(Area area) {
                 return Optional.ofNullable(switch (area) {
-                    case THE_PANDEMONIUM_FORTRESS -> pandemoniumFortress();
+                    case THE_PANDEMONIUM_FORTRESS -> thePandemoniumFortress();
                     case CITY_OF_THE_DAMNED -> cityOfTheDamned();
                     case RIVER_OF_FLAME -> riverOfFlame();
                     default -> null;
                 });
             }
 
-            public static class Builder extends ActStatus.Waypoints.Builder<Act4.Waypoints.Builder> {
+            @Override
+            public Map<Area, Boolean> all() {
+                return new ImmutableMap.Builder<Area, Boolean>()
+                        .put(Area.THE_PANDEMONIUM_FORTRESS, thePandemoniumFortress)
+                        .put(Area.CITY_OF_THE_DAMNED, cityOfTheDamned)
+                        .put(Area.RIVER_OF_FLAME, riverOfFlame)
+                        .build();
+            }
+
+            public static final class Builder extends ActStatus.Waypoints.Builder<Act4.Waypoints.Builder> {
                 @Override
                 protected Optional<Act4.Waypoints.Builder> trySet(Area area, boolean active) {
                     return Optional.ofNullable(switch (area) {
-                        case THE_PANDEMONIUM_FORTRESS -> pandemoniumFortress(active);
+                        case THE_PANDEMONIUM_FORTRESS -> thePandemoniumFortress(active);
                         case CITY_OF_THE_DAMNED -> cityOfTheDamned(active);
                         case RIVER_OF_FLAME -> riverOfFlame(active);
                         default -> null;
@@ -472,12 +595,10 @@ public abstract class ActStatus<
             }
         }
 
-        public static class Builder extends ActStatus.Builder<Quests.Builder, Waypoints.Builder, Builder> {
-
-        }
+        public static final class Builder extends ActStatus.Builder<Quests.Builder, Waypoints.Builder, Builder> { }
     }
 
-    public static class Act5 extends ActStatus<Act5.Quests, Act5.Waypoints> {
+    public static final class Act5 extends ActStatus<Act5.Quests, Act5.Waypoints> {
 
         @lombok.Builder
         public Act5(Difficulty difficulty, boolean visited, boolean introduced,
@@ -488,7 +609,7 @@ public abstract class ActStatus<
         @lombok.Builder
         @Getter
         @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-        public static class Quests extends ActStatus.Quests {
+        public static final class Quests extends ActStatus.Quests {
 
             Generic siegeOnHarrogath;
             Generic rescueOnMountainArreat;
@@ -501,17 +622,29 @@ public abstract class ActStatus<
             @SuppressWarnings({"unchecked", "unused"})
             public <Q extends Quest<S>, S extends QuestStatus> Optional<S> tryGet(Q quest) {
                 return Optional.ofNullable(switch (quest) {
-                    case Quest.Act5.SiegeOnHarrogath q -> (S) siegeOnHarrogath();
-                    case Quest.Act5.RescueOnMountainArreat q -> (S) rescueOnMountainArreat();
-                    case Quest.Act5.PrisonOfIce q -> (S) prisonOfIce();
-                    case Quest.Act5.BetrayalOfHarrogath q -> (S) betrayalOfHarrogath();
-                    case Quest.Act5.RiteOfPassage q -> (S) riteOfPassage();
-                    case Quest.Act5.EveOfDestruction q -> (S) eveOfDestruction();
+                    case Quest.Act5.SiegeOnHarrogath q -> (S) siegeOnHarrogath;
+                    case Quest.Act5.RescueOnMountainArreat q -> (S) rescueOnMountainArreat;
+                    case Quest.Act5.PrisonOfIce q -> (S) prisonOfIce;
+                    case Quest.Act5.BetrayalOfHarrogath q -> (S) betrayalOfHarrogath;
+                    case Quest.Act5.RiteOfPassage q -> (S) riteOfPassage;
+                    case Quest.Act5.EveOfDestruction q -> (S) eveOfDestruction;
                     default -> null;
                 });
             }
 
-            public static class Builder extends ActStatus.Quests.Builder<Act5.Quests.Builder> {
+            @Override
+            public Map<Quest<?>, QuestStatus> all() {
+                return new ImmutableMap.Builder<Quest<?>, QuestStatus>()
+                        .put(Quest.SIEGE_ON_HARROGATH, siegeOnHarrogath)
+                        .put(Quest.RESCUE_ON_MOUNTAIN_ARREAT, rescueOnMountainArreat)
+                        .put(Quest.PRISON_OF_ICE, prisonOfIce)
+                        .put(Quest.BETRAYAL_OF_HARROGATH, betrayalOfHarrogath)
+                        .put(Quest.RITE_OF_PASSAGE, riteOfPassage)
+                        .put(Quest.EVE_OF_DESTRUCTION, eveOfDestruction)
+                        .build();
+            }
+
+            public static final class Builder extends ActStatus.Quests.Builder<Act5.Quests.Builder> {
                 @Override
                 @SuppressWarnings("unused")
                 protected <Q extends Quest<S>, S extends QuestStatus> Optional<Act5.Quests.Builder> trySet(Q quest, S status) {
@@ -531,7 +664,7 @@ public abstract class ActStatus<
         @lombok.Builder
         @Getter
         @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-        public static class Waypoints extends ActStatus.Waypoints {
+        public static final class Waypoints extends ActStatus.Waypoints {
 
             boolean harrogath;
             boolean frigidHighlands;
@@ -546,20 +679,35 @@ public abstract class ActStatus<
             @Override
             public Optional<Boolean> tryGet(Area area) {
                 return Optional.ofNullable(switch (area) {
-                    case HARROGATH -> harrogath();
-                    case FRIGID_HIGHLANDS -> frigidHighlands();
-                    case ARREAT_PLATEAU -> arreatPlateau();
-                    case CRYSTALLINE_PASSAGE -> crystallinePassage();
-                    case HALLS_OF_PAIN -> hallsOfPain();
-                    case GLACIAL_TRAIL -> glacialTrail();
-                    case FROZEN_TUNDRA -> frozenTundra();
-                    case THE_ANCIENTS_WAY -> theAncientsWay();
-                    case WORLDSTONE_KEEP_LEVEL_2 -> worldstoneKeep();
+                    case HARROGATH -> harrogath;
+                    case FRIGID_HIGHLANDS -> frigidHighlands;
+                    case ARREAT_PLATEAU -> arreatPlateau;
+                    case CRYSTALLINE_PASSAGE -> crystallinePassage;
+                    case HALLS_OF_PAIN -> hallsOfPain;
+                    case GLACIAL_TRAIL -> glacialTrail;
+                    case FROZEN_TUNDRA -> frozenTundra;
+                    case THE_ANCIENTS_WAY -> theAncientsWay;
+                    case WORLDSTONE_KEEP_LEVEL_2 -> worldstoneKeep;
                     default -> null;
                 });
             }
 
-            public static class Builder extends ActStatus.Waypoints.Builder<Act5.Waypoints.Builder> {
+            @Override
+            public Map<Area, Boolean> all() {
+                return new ImmutableMap.Builder<Area, Boolean>()
+                        .put(Area.HARROGATH, harrogath)
+                        .put(Area.FRIGID_HIGHLANDS, frigidHighlands)
+                        .put(Area.ARREAT_PLATEAU, arreatPlateau)
+                        .put(Area.CRYSTALLINE_PASSAGE, crystallinePassage)
+                        .put(Area.HALLS_OF_PAIN, hallsOfPain)
+                        .put(Area.GLACIAL_TRAIL, glacialTrail)
+                        .put(Area.FROZEN_TUNDRA, frozenTundra)
+                        .put(Area.THE_ANCIENTS_WAY, theAncientsWay)
+                        .put(Area.WORLDSTONE_KEEP_LEVEL_2, worldstoneKeep)
+                        .build();
+            }
+
+            public static final class Builder extends ActStatus.Waypoints.Builder<Act5.Waypoints.Builder> {
                 @Override
                 protected Optional<Act5.Waypoints.Builder> trySet(Area area, boolean active) {
                     return Optional.ofNullable(switch (area) {
@@ -578,8 +726,6 @@ public abstract class ActStatus<
             }
         }
 
-        public static class Builder extends ActStatus.Builder<Quests.Builder, Waypoints.Builder, Builder> {
-
-        }
+        public static final class Builder extends ActStatus.Builder<Quests.Builder, Waypoints.Builder, Builder> { }
     }
 }
