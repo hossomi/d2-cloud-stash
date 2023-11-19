@@ -1,9 +1,8 @@
 package br.com.yomigae.cloudstash.core.model.character;
 
 import br.com.yomigae.cloudstash.core.model.*;
-import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
 import br.com.yomigae.cloudstash.core.model.acts.ActStatus;
-import lombok.Builder;
+import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
 import lombok.Getter;
 import lombok.Singular;
 
@@ -15,11 +14,12 @@ import java.util.Objects;
 import static br.com.yomigae.cloudstash.core.util.StringUtils.Divider.SINGLE;
 import static br.com.yomigae.cloudstash.core.util.StringUtils.checkbox;
 import static br.com.yomigae.cloudstash.core.util.StringUtils.divider;
+import static java.util.Comparator.comparing;
 
-@Builder
+@lombok.Builder
 public record Character(
         String name,
-        CharacterClass klass,
+        CharacterClass clazz,
         boolean ladder,
         boolean expansion,
         boolean hardcore,
@@ -38,7 +38,10 @@ public record Character(
         Map<Difficulty, Acts> acts,
 
         @Singular
-        Map<Attribute, Integer> attributes) {
+        Map<Attribute, Integer> attributes,
+        @Singular
+        Map<Skill, Integer> skills) {
+
     @Override
     public boolean equals(Object o) {
         if (this == o) { return true; }
@@ -50,26 +53,29 @@ public record Character(
                 && level == character.level
                 && dead == character.dead
                 && name.equals(character.name)
-                && klass == character.klass
+                && clazz == character.clazz
                 && currentAct == character.currentAct
                 && activeEquipmentSet == character.activeEquipmentSet
                 && mouseSkill.equals(character.mouseSkill)
                 && skillHotkeys.equals(character.skillHotkeys)
                 && Objects.equals(hireling, character.hireling)
                 && acts.equals(character.acts)
-                && attributes.equals(character.attributes);
+                && attributes.equals(character.attributes)
+                && skills.equals(character.skills);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, klass, ladder, expansion, hardcore, level, currentAct, dead, activeEquipmentSet, mouseSkill, skillHotkeys, hireling, acts, attributes);
+        return Objects.hash(name, clazz, ladder, expansion, hardcore, level, currentAct,
+                dead, activeEquipmentSet, mouseSkill, skillHotkeys, hireling, acts,
+                attributes, skills);
     }
 
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder();
         string.append(name)
-                .append(" (level ").append(level).append(" ").append(klass)
+                .append(" (level ").append(level).append(" ").append(clazz)
                 .append(")\n").append(checkbox("Expansion", expansion))
                 .append(" ").append(checkbox("Ladder", ladder))
                 .append(" ").append(checkbox("Dead", dead))
@@ -91,6 +97,15 @@ public record Character(
                 .forEach((a) -> string
                         .append("\n").append(a.label()).append(": ")
                         .append(a.format(attributes.get(a))));
+        string
+                .append("\n\nSkills")
+                .append("\n").append(divider(SINGLE));
+        skills.keySet()
+                .stream()
+                .sorted(comparing(Skill::id))
+                .forEach((s) -> string
+                        .append("\n").append(s.name()).append(": ")
+                        .append(skills.get(s)));
 
         if (hireling != null) {
             string.append("\n\n").append(hireling);
@@ -98,8 +113,15 @@ public record Character(
         return string.toString();
     }
 
-    public Acts progression(Difficulty difficulty) {
-        return acts.get(difficulty);
+    public static class Builder {
+        public CharacterClass clazz() {
+            return clazz;
+        }
+
+        public Builder clazz(CharacterClass type) {
+            this.clazz = type;
+            return this;
+        }
     }
 
     public record Acts(

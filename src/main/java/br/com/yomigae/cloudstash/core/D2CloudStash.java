@@ -18,7 +18,7 @@ public class D2CloudStash {
 //                .dead(false)
 //                .hardcore(false)
 //                .currentAct(Act.ACT4_NIGHTMARE)
-//                .klass(CharacterClass.SORCERESS)
+//                .clazz(CharacterClass.SORCERESS)
 //                .level(71)
 //                .skillHotkeys(List.of(
 //                        Skill.fromName("Frozen Orb"),
@@ -33,7 +33,7 @@ public class D2CloudStash {
 //                        new Dual<>(Skill.fromName("Throw"), Skill.fromName("Frozen Orb"))))
 //                .name("Starfire")
 //                .hireling(Hireling.builder()
-//                        .type(HirelingType.fromId(10, true))
+//                        .clazz(HirelingType.fromId(10, true))
 //                        .nameId(13)
 //                        .dead(false)
 //                        .experience(43555412)

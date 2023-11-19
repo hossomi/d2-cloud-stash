@@ -22,7 +22,20 @@ public enum CharacterClass {
         }
         return values()[index];
     }
-
+    public static CharacterClass from(String label) {
+        return switch(label) {
+            case "ama" -> AMAZON;
+            case "sor" -> SORCERESS;
+            case "nec" -> NECROMANCER;
+            case "pal" -> PALADIN;
+            case "bar" -> BARBARIAN;
+            case "dru" -> DRUID;
+            case "ass" -> ASSASSIN;
+            default -> throw new IllegalArgumentException(String.format(
+                    "Invalid CharacterClass label: %s",
+                    label));
+        };
+    }
 
     @Override
     public String toString() {

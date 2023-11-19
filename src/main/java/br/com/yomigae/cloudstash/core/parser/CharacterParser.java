@@ -51,6 +51,7 @@ public abstract class CharacterParser {
         parseHeader(reader, character);
         parseActs(reader, character);
         parseAttributes(reader, character);
+        parseSkills(reader, character);
         return character.build();
     }
 
@@ -61,4 +62,6 @@ public abstract class CharacterParser {
     protected abstract void parseActs(D2BinaryReader reader, Builder character);
 
     protected abstract void parseAttributes(D2BinaryReader reader, Builder character);
+
+    protected abstract void parseSkills(D2BinaryReader reader, Builder character);
 }

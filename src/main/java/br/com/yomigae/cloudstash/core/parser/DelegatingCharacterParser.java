@@ -43,4 +43,9 @@ public class DelegatingCharacterParser extends CharacterParser {
     protected void parseActs(D2BinaryReader reader, Builder character) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    protected void parseSkills(D2BinaryReader reader, Builder character) {
+        throw new UnsupportedOperationException();
+    }
 }
