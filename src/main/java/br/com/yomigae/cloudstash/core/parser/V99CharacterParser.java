@@ -231,6 +231,29 @@ public class V99CharacterParser extends VersionCharacterParser {
         character.skills(Maps.toMap(Skill.forClass(character.clazz()), s -> (int) reader.readByte()));
     }
 
+    @Override
+    protected void parseItems(D2BinaryReader reader, Builder character) {
+        reader.find("JM".getBytes()).skipBytes(2);
+        System.out.println("Count: " + reader.readShort());
+
+        System.out.println("Identified: " + (reader.skip(4).read(1) > 0));
+        System.out.println("Socketed: " + (reader.skip(6).read(1) > 0));
+        System.out.println("Last picked up: " + (reader.skip(1).read(1) > 0));
+        System.out.println("Ear: " + (reader.skip(2).read(1) > 0));
+        System.out.println("Starter: " + (reader.skip(0).read(1) > 0));
+        System.out.println("Compact: " + (reader.skip(3).read(1) > 0));
+        System.out.println("Ethereal: " + (reader.skip(0).read(1) > 0));
+        System.out.println("Personalized: " + (reader.skip(1).read(1) > 0));
+        System.out.println("Runeword: " + (reader.skip(1).read(1) > 0));
+        System.out.printf("Parent: %x\n", reader.skip(8).read(3));
+        System.out.printf("Equipped: %x\n", reader.skip(0).read(4));
+        System.out.printf("Col: %x\n", reader.skip(0).read(4));
+        System.out.printf("Row: %x\n", reader.skip(0).read(4));
+        System.out.printf("Stash: %x\n", reader.skip(0).read(3));
+        String str = reader.skip(0).readString(4);
+        System.out.printf("Type: %s\n", str);
+    }
+
     private static QuestStatus.Generic parseGenericQuest(D2BinaryReader reader) {
         return new QuestStatus.Generic((reader.readShort() & 0x0001) == 1);
     }

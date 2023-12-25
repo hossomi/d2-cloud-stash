@@ -1,4 +1,4 @@
-package br.com.yomigae.cloudstash.core.io;
+package br.com.yomigae.cloudstash.core;
 
 import org.assertj.core.api.AbstractLongAssert;
 
@@ -22,13 +22,13 @@ public class LongBinaryAssert extends AbstractLongAssert<LongBinaryAssert> {
     public LongBinaryAssert isEqualTo(long expected) {
         int length = getLongest(actual, expected);
         info.overridingErrorMessage(format(
-                "%nExpecting:%n <%s>%nto be equal to:%n <%s>%nbut was not.",
-                formatAsBinaryPair(length, actual),
-                formatAsBinaryPair(length, expected)));
+                "%nExpected: <%s>%nActual:   <%s>",
+                formatAsBinaryPair(length, expected),
+                formatAsBinaryPair(length, actual)));
         return super.isEqualTo(expected);
     }
 
-    private String formatAsBinaryPair(int length, long value) {
+    private static String formatAsBinaryPair(int length, long value) {
         return format(format("%%%ds | %%s", length), value, padStart(toBinaryString(value), 32, '0'));
     }
 

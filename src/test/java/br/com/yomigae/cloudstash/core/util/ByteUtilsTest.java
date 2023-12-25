@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static br.com.yomigae.cloudstash.core.io.LongBinaryAssert.assertThatBinary;
+import static br.com.yomigae.cloudstash.core.LongBinaryAssert.assertThatBinary;
 import static br.com.yomigae.cloudstash.core.util.ByteUtils.flipBits;
 import static br.com.yomigae.cloudstash.core.util.ByteUtils.flipBytes;
 import static br.com.yomigae.cloudstash.core.util.Utils.binaryToLong;

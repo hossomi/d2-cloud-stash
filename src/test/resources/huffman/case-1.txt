@@ -1,0 +1,15 @@
+# One-sided tree
+AAAAAAAAAAAAAAAABBBBBBBBCCCCDDE
+A   16  1
+B   8   01
+C   4   001
+D   2   0001
+E   1   0000
+
+# Samples
+A           1
+B           01
+ABCDE       10100100010000
+EDCBA       00000001001011
+AAAAA       11111
+EEEEE       00000000000000000000

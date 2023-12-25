@@ -144,7 +144,7 @@ public class D2BinaryReader {
 
         for (int i = 0; i < size; i++) {
             char c = (char) readByte();
-            if (c == 0) {break;}
+            if (c == 0) { break; }
             string.append(c);
         }
 

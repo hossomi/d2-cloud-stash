@@ -1,0 +1,14 @@
+# Balanced tree
+ABCD
+A   1   00
+B   1   01
+C   1   10
+D   1   11
+
+# Samples
+A       00
+D       11
+ABCD    00011011
+DCBA    11100100
+AAAA    00000000
+DDDD    11111111

@@ -8,8 +8,8 @@ import static java.util.Objects.requireNonNull;
 public class D2CloudStash {
     public static void main(String[] args) throws Exception {
         var p = new DelegatingCharacterParser();
-        Character c = p.parse(requireNonNull(D2CloudStash.class.getResourceAsStream("/samples/Starfire-6.d2s")));
-        System.out.println(c);
+        Character c = p.parse(requireNonNull(D2CloudStash.class.getResourceAsStream("/samples/Zeus.d2s")));
+//        System.out.println(c);
 //
 //        Character.builder()
 //                .activeEquipmentSet(EquipmentSet.MAIN)
