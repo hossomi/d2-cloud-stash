@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.Sets;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -13,11 +14,14 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.google.common.base.Strings.padStart;
-import static java.lang.Long.toBinaryString;
+import static com.google.common.base.Strings.repeat;
+import static com.google.common.collect.Maps.filterValues;
+import static com.google.common.collect.Maps.transformValues;
 import static java.util.Comparator.comparing;
 import static java.util.Map.entry;
 import static java.util.stream.Collectors.*;
 
+@AllArgsConstructor
 public class Huffman {
 
     sealed private interface Node extends Comparable<Node> {
@@ -73,9 +77,13 @@ public class Huffman {
     }
 
     public record Code(long value, int length) {
+        public String toBinaryString() {
+            return padStart(Long.toBinaryString(value), length, '0');
+        }
+
         @Override
         public String toString() {
-            return "%d:%s".formatted(length, padStart(toBinaryString(value), length, '0'));
+            return "%d:%s".formatted(length, toBinaryString());
         }
     }
 
@@ -84,7 +92,14 @@ public class Huffman {
     @Getter
     private final Map<Character, Code> codes;
 
-    public static Huffman from(Map<Character, Integer> values) {
+    public static Huffman fromString(String string) {
+        Map<Character, Integer> values = IntStream.range(0, string.length())
+                .mapToObj(string::charAt)
+                .collect(groupingBy(c -> c, reducing(0, c -> 1, Integer::sum)));
+        return fromWeights(values);
+    }
+
+    public static Huffman fromWeights(Map<Character, Integer> values) {
         PriorityQueue<Node> queue = values.entrySet().stream().collect(
                 PriorityQueue::new,
                 (q, e) -> q.add(new Leaf(e.getValue(), e.getKey())),
@@ -93,20 +108,16 @@ public class Huffman {
         while (queue.size() > 1) {
             Node left = queue.poll();
             Node right = queue.poll();
-            System.out.printf("Adding: %s + %s\n", left, right);
             queue.add(new Mid(left.weight() + right.weight(), left, right));
         }
         return new Huffman(queue.poll());
     }
 
-    public static Huffman from(String string) {
-        Map<Character, Integer> values = IntStream.range(0, string.length())
-                .mapToObj(string::charAt)
-                .collect(groupingBy(c -> c, reducing(0, c -> 1, Integer::sum)));
-        return from(values);
+    public static Huffman fromCodes(Map<Character, Code> codes) {
+        return new Huffman(codes);
     }
 
-    public static Huffman fromJson(InputStream input) throws IOException {
+    public static Huffman fromJsonTree(InputStream input) throws IOException {
         return new Huffman(fromJsonNode(JSON.readTree(input), 0));
     }
 
@@ -139,22 +150,35 @@ public class Huffman {
 
     private Huffman(Node root) {
         this.root = root;
-        this.codes = getCodes(root, 0, 0).stream().collect(toMap(
+        this.codes = buildCodes(root, 0, 0).stream().collect(toMap(
                 Map.Entry::getKey,
                 Map.Entry::getValue));
     }
 
-    private Set<Map.Entry<Character, Code>> getCodes(Node node, long value, int length) {
+    private Huffman(Map<Character, Code> codes) {
+        this.codes = codes;
+        this.root = buildTree(transformValues(codes, Code::toBinaryString));
+    }
+
+    private static Set<Map.Entry<Character, Code>> buildCodes(Node node, long value, int length) {
         if (node == null) {
             return Set.of();
         }
         return switch (node) {
             case Leaf(int weight, char symbol) -> Set.of(entry(symbol, new Code(value, length)));
             case Mid(int weight, Node left, Node right) -> Sets.union(
-                    getCodes(left, value << 1, length + 1),
-                    getCodes(right, (value << 1) + 1, length + 1));
+                    buildCodes(left, value << 1, length + 1),
+                    buildCodes(right, (value << 1) + 1, length + 1));
             default -> Set.of();
         };
+    }
+
+    private static Node buildTree(Map<Character, String> codes) {
+        return codes.size() > 1
+                ? new Mid(0,
+                buildTree(transformValues(filterValues(codes, v -> v.charAt(0) == '0'), v -> v.substring(1))),
+                buildTree(transformValues(filterValues(codes, v1 -> v1.charAt(0) == '1'), v1 -> v1.substring(1))))
+                : new Leaf(0, codes.keySet().iterator().next());
     }
 
     public Code encode(String source) {
@@ -168,6 +192,10 @@ public class Huffman {
     }
 
     public String decode(long value, int length) {
+        if (root instanceof Leaf l) {
+            return String.valueOf(l.symbol).repeat(length);
+        }
+
         Mid node = (Mid) root;
         String out = "";
         long bit = 0x1L << length - 1;

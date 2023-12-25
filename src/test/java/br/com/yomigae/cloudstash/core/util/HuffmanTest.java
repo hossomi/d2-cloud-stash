@@ -2,6 +2,7 @@ package br.com.yomigae.cloudstash.core.util;
 
 import br.com.yomigae.cloudstash.core.ExtendedSoftAssertions;
 import br.com.yomigae.cloudstash.core.util.Huffman.Code;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -29,16 +30,30 @@ class HuffmanTest {
 
     @ParameterizedTest
     @MethodSource("cases")
-    void fromWeightsWorks(String file) {
+    void fromStringWorks(String file) {
         Case testCase = Case.from(file);
-        testCase.test(Huffman.from(testCase.weights));
+        testCase.test(Huffman.fromString(testCase.source));
     }
 
     @ParameterizedTest
     @MethodSource("cases")
-    void fromStringWorks(String file) {
+    void fromWeightsWorks(String file) {
         Case testCase = Case.from(file);
-        testCase.test(Huffman.from(testCase.source));
+        testCase.test(Huffman.fromWeights(testCase.weights));
+    }
+
+    @ParameterizedTest
+    @MethodSource("cases")
+    void fromCodesWorks(String file) {
+        Case testCase = Case.from(file);
+        testCase.test(Huffman.fromCodes(testCase.codes));
+    }
+
+    @Test
+    void singleSymbolWorks() {
+        Huffman tree = Huffman.fromString("a");
+        assertThat(tree.encode("a")).isEqualTo(new Code(0, 0));
+        assertThat(tree.decode(0, 5)).isEqualTo("aaaaa");
     }
 
     static Stream<String> cases() throws URISyntaxException {
