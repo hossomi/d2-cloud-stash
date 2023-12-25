@@ -14,11 +14,11 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.google.common.base.Strings.padStart;
-import static com.google.common.base.Strings.repeat;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.transformValues;
 import static java.util.Comparator.comparing;
 import static java.util.Map.entry;
+import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.*;
 
 @AllArgsConstructor
@@ -26,6 +26,7 @@ public class Huffman {
 
     sealed private interface Node extends Comparable<Node> {
         Comparator<Node> COMPARATOR = comparing(Node::weight).thenComparing(Node::label);
+        Empty EMPTY = new Empty();
 
         int weight();
 
@@ -124,7 +125,7 @@ public class Huffman {
     private static Node fromJsonNode(JsonNode node, int level) {
         if (node instanceof ArrayNode array) {
             if (array.isEmpty()) {
-                return new Empty();
+                return Node.EMPTY;
             }
             if (array.size() == 2) {
                 return new Mid(
@@ -149,8 +150,8 @@ public class Huffman {
     }
 
     private Huffman(Node root) {
-        this.root = root;
-        this.codes = buildCodes(root, 0, 0).stream().collect(toMap(
+        this.root = requireNonNullElse(root, Node.EMPTY);
+        this.codes = buildCodes(this.root, 0, 0).stream().collect(toMap(
                 Map.Entry::getKey,
                 Map.Entry::getValue));
     }
@@ -161,9 +162,6 @@ public class Huffman {
     }
 
     private static Set<Map.Entry<Character, Code>> buildCodes(Node node, long value, int length) {
-        if (node == null) {
-            return Set.of();
-        }
         return switch (node) {
             case Leaf(int weight, char symbol) -> Set.of(entry(symbol, new Code(value, length)));
             case Mid(int weight, Node left, Node right) -> Sets.union(
@@ -192,27 +190,27 @@ public class Huffman {
     }
 
     public String decode(long value, int length) {
+        if (length == 0 || root instanceof Empty) {
+            return "";
+        }
         if (root instanceof Leaf l) {
             return String.valueOf(l.symbol).repeat(length);
         }
 
         Mid node = (Mid) root;
-        String out = "";
-        long bit = 0x1L << length - 1;
-        while (bit != 0) {
-            Node next = (value & bit) == 0 ? node.left() : node.right();
+        StringBuilder decoded = new StringBuilder();
+        for (long bit = 0x1L << length - 1; bit != 0; bit >>= 1) {
+            Node next = (value & bit) == 0 ? node.left : node.right;
             switch (next) {
                 case Leaf l -> {
-                    out += l.symbol;
+                    decoded.append(l.symbol);
                     node = (Mid) root;
                 }
                 case Mid m -> node = m;
-                case null, default -> {
-                }
+                default -> { }
             }
-            bit >>= 1;
         }
-        return out;
+        return decoded.toString();
     }
 
     @Override

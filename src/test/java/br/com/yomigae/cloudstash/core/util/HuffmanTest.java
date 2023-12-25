@@ -56,6 +56,13 @@ class HuffmanTest {
         assertThat(tree.decode(0, 5)).isEqualTo("aaaaa");
     }
 
+    @Test
+    void noSymbolWorks() {
+        Huffman tree = Huffman.fromString("");
+        assertThat(tree.encode("")).isEqualTo(new Code(0, 0));
+        assertThat(tree.decode(0, 5)).isEqualTo("");
+    }
+
     static Stream<String> cases() throws URISyntaxException {
         URL resource = requireNonNull(HuffmanTest.class.getResource("/huffman"), "Huffman sample folder not found");
         File root = new File(resource.toURI());
