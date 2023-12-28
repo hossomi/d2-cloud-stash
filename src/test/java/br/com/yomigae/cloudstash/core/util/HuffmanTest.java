@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Streams.stream;
@@ -30,23 +32,23 @@ class HuffmanTest {
 
     @ParameterizedTest
     @MethodSource("cases")
-    void fromStringWorks(String file) {
-        Case testCase = Case.from(file);
-        testCase.test(Huffman.fromString(testCase.source));
+    void fromStringWorks(Case test) {
+        Huffman tree = Huffman.fromString(test.source);
+        test.assertEncodingAndDecoding(tree);
     }
 
     @ParameterizedTest
     @MethodSource("cases")
-    void fromWeightsWorks(String file) {
-        Case testCase = Case.from(file);
-        testCase.test(Huffman.fromWeights(testCase.weights));
+    void fromWeightsWorks(Case test) {
+        Huffman tree = Huffman.fromWeights(test.weights);
+        test.assertEncodingAndDecoding(tree);
     }
 
     @ParameterizedTest
     @MethodSource("cases")
-    void fromCodesWorks(String file) {
-        Case testCase = Case.from(file);
-        testCase.test(Huffman.fromCodes(testCase.codes));
+    void fromCodesWorks(Case test) {
+        Huffman tree = Huffman.fromCodes(test.codes);
+        test.assertEncodingAndDecoding(tree);
     }
 
     @Test
@@ -63,15 +65,54 @@ class HuffmanTest {
         assertThat(tree.decode(0, 5)).isEqualTo("");
     }
 
-    static Stream<String> cases() throws URISyntaxException {
+    @Test
+    void decodeIteratorDecodesSingleDigits() {
+        Huffman tree = Huffman.fromCodes(Map.of(
+                'A', new Code(0b0, 1),
+                'B', new Code(0b1, 1)
+        ));
+        assertThat(tree.decode(streamBits(0b01, 2)))
+                .containsExactly('B', 'A');
+    }
+
+    @Test
+    void decodeIteratorDecodesMultipleDigits() {
+        Huffman tree = Huffman.fromCodes(Map.of(
+                'A', new Code(0b00, 2),
+                'B', new Code(0b01, 2),
+                'C', new Code(0b10, 2),
+                'D', new Code(0b11, 2)
+        ));
+        assertThat(tree.decode(streamBits(0b00110110, 8)))
+                .containsExactly('B', 'C', 'D', 'A');
+    }
+
+    @Test
+    void decodeIteratorDecodesMixedDigits() {
+        Huffman tree = Huffman.fromCodes(Map.of(
+                'A', new Code(0b0, 1),
+                'B', new Code(0b10, 2),
+                'C', new Code(0b110, 3),
+                'D', new Code(0b111, 3)
+        ));
+        assertThat(tree.decode(streamBits(0b0100110111, 10)))
+                .containsExactly('D', 'A', 'C', 'A', 'B');
+    }
+
+    private static LongStream streamBits(long value, int length) {
+        return IntStream.range(0, length)
+                .mapToLong(i -> (value & (1L << i)) >> i);
+    }
+
+    static Stream<Case> cases() throws URISyntaxException {
         URL resource = requireNonNull(HuffmanTest.class.getResource("/huffman"), "Huffman sample folder not found");
         File root = new File(resource.toURI());
         if (!root.isDirectory()) {
             throw new IllegalArgumentException("Huffman sample folder is not a folder");
         }
         return Stream.of(requireNonNull(root.list()))
-                .sorted((a, b) -> a.length() - b.length() != 0 ? a.length() - b.length() : a.compareTo(b))
-                .map("/huffman/%s"::formatted);
+                .map("/huffman/%s"::formatted)
+                .map(Case::from);
     }
 
     private record Case(
@@ -80,7 +121,7 @@ class HuffmanTest {
             Map<Character, Code> codes,
             Map<String, String> samples) {
 
-        public Case(String source) {
+        private Case(String source) {
             this(source, new HashMap<>(), new HashMap<>(), new HashMap<>());
         }
 
@@ -136,20 +177,26 @@ class HuffmanTest {
             return test;
         }
 
-        public void test(Huffman tree) {
-            assertThat(tree.codes()).as("Huffman codes").isEqualTo(codes);
+        public void assertEncodingAndDecoding(Huffman tree) {
+            assertThat(tree.codes())
+                    .as("Huffman codes")
+                    .isEqualTo(codes);
+
             ExtendedSoftAssertions a = new ExtendedSoftAssertions();
-            samples.forEach((decoded, encodedString) -> {
+            samples.forEach((decoded, encoded) -> {
                 Code code = tree.encode(decoded);
-                long encoded = parseLong(encodedString, 2);
+                long value = parseLong(encoded, 2);
+
                 a.assertThatBinary(code.value())
-                        .as("%s code value", decoded)
-                        .isEqualTo(encoded);
+                        .as("'%s' code value", decoded)
+                        .isEqualTo(value);
+
                 a.assertThat(code.length())
-                        .as("%s code length", decoded)
-                        .isEqualTo(encodedString.length());
-                a.assertThat(tree.decode(encoded, encodedString.length()))
-                        .as("Decoding %s", encodedString)
+                        .as("'%s' code length", decoded)
+                        .isEqualTo(encoded.length());
+
+                a.assertThat(tree.decode(value, encoded.length()))
+                        .as("Decoding '%s'", encoded)
                         .isEqualTo(decoded);
             });
             a.assertAll();

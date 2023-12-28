@@ -10,12 +10,15 @@ import br.com.yomigae.cloudstash.core.model.character.Character.Builder;
 import br.com.yomigae.cloudstash.core.model.character.CharacterClass;
 import br.com.yomigae.cloudstash.core.model.hireling.Hireling;
 import br.com.yomigae.cloudstash.core.model.hireling.HirelingType;
+import br.com.yomigae.cloudstash.core.util.Huffman;
 import com.google.common.collect.Maps;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static br.com.yomigae.cloudstash.core.parser.ParserUtils.SaveFileAttribute;
 import static br.com.yomigae.cloudstash.core.parser.ParserUtils.saveFileAttribute;
@@ -25,8 +28,15 @@ import static com.google.common.collect.Maps.transformValues;
 
 public class V99CharacterParser extends VersionCharacterParser {
 
+    private final Huffman huffman;
+
     public V99CharacterParser() {
         super(99);
+        try {
+            this.huffman = Huffman.fromCodes(getClass().getResourceAsStream("/data/huffman/codes-v99.json"));
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load Huffman codes for item ID parsing", e);
+        }
     }
 
     @Override
@@ -250,8 +260,12 @@ public class V99CharacterParser extends VersionCharacterParser {
         System.out.printf("Col: %x\n", reader.skip(0).read(4));
         System.out.printf("Row: %x\n", reader.skip(0).read(4));
         System.out.printf("Stash: %x\n", reader.skip(0).read(3));
-        String str = reader.skip(0).readString(4);
-        System.out.printf("Type: %s\n", str);
+        Stream<java.lang.Character> decoded = huffman.decode(reader.bitstream());
+        String itemId = decoded
+                .limit(4)
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+                .toString();
+        System.out.println(itemId);
     }
 
     private static QuestStatus.Generic parseGenericQuest(D2BinaryReader reader) {

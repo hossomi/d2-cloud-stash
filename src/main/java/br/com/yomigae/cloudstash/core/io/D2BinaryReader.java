@@ -5,6 +5,8 @@ import br.com.yomigae.cloudstash.core.util.ByteUtils;
 import com.google.common.primitives.Bytes;
 
 import java.util.HexFormat;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static br.com.yomigae.cloudstash.core.util.ByteUtils.flipBits;
 import static br.com.yomigae.cloudstash.core.util.ByteUtils.transform;
@@ -152,4 +154,7 @@ public class D2BinaryReader {
         return string.toString();
     }
 
+    public LongStream bitstream() {
+        return Stream.generate(() -> read(1)).mapToLong(x -> x);
+    }
 }

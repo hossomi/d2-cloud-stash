@@ -1,10 +1,9 @@
 package br.com.yomigae.cloudstash.core.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,10 +11,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.padStart;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.transformValues;
+import static com.google.common.collect.Streams.stream;
 import static java.util.Comparator.comparing;
 import static java.util.Map.entry;
 import static java.util.Objects.requireNonNullElse;
@@ -89,6 +91,8 @@ public class Huffman {
     }
 
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final TypeReference<Map<Character, Code>> CODES_MAP = new TypeReference<>() { };
+
     private final Node root;
     @Getter
     private final Map<Character, Code> codes;
@@ -114,39 +118,12 @@ public class Huffman {
         return new Huffman(queue.poll());
     }
 
+    public static Huffman fromCodes(InputStream input) throws IOException {
+        return fromCodes(JSON.readValue(input, CODES_MAP));
+    }
+
     public static Huffman fromCodes(Map<Character, Code> codes) {
         return new Huffman(codes);
-    }
-
-    public static Huffman fromJsonTree(InputStream input) throws IOException {
-        return new Huffman(fromJsonNode(JSON.readTree(input), 0));
-    }
-
-    private static Node fromJsonNode(JsonNode node, int level) {
-        if (node instanceof ArrayNode array) {
-            if (array.isEmpty()) {
-                return Node.EMPTY;
-            }
-            if (array.size() == 2) {
-                return new Mid(
-                        0,
-                        fromJsonNode(array.get(0), level + 1),
-                        fromJsonNode(array.get(1), level + 1));
-            }
-            throw new IllegalArgumentException(String.format(
-                    "Invalid Huffman tree at level %d: array of size %d (expected 0 or 2)",
-                    level, array.size()));
-        } else if (node instanceof TextNode text) {
-            if (text.textValue().length() == 1) {
-                return new Leaf(0, text.textValue().charAt(0));
-            }
-            throw new IllegalArgumentException(String.format(
-                    "Invalid Huffman tree at level %d: %s (expected single character)",
-                    level, text.textValue()));
-        }
-        throw new IllegalArgumentException(String.format(
-                "Invalid Huffman tree at level %d: %s (expected array or string)",
-                level, node.getNodeType()));
     }
 
     private Huffman(Node root) {
@@ -213,8 +190,40 @@ public class Huffman {
         return decoded.toString();
     }
 
+    public Stream<Character> decode(LongStream bits) {
+        return decode(bits.iterator());
+    }
+
+    public Stream<Character> decode(PrimitiveIterator.OfLong bits) {
+        return stream(new HuffmanDecodingIterator(root, bits));
+    }
+
     @Override
     public String toString() {
         return root.toString();
+    }
+
+    @AllArgsConstructor
+    private static class HuffmanDecodingIterator implements Iterator<Character> {
+
+        private final Node root;
+        private final PrimitiveIterator.OfLong bits;
+
+        @Override
+        public boolean hasNext() {
+            return !(root instanceof Empty) && bits.hasNext();
+        }
+
+        @Override
+        public Character next() {
+            Node node = root;
+            while (node instanceof Mid m && bits.hasNext()) {
+                node = bits.next() == 0 ? m.left : m.right;
+            }
+
+            return node instanceof Leaf l
+                    ? l.symbol
+                    : '\0';
+        }
     }
 }
