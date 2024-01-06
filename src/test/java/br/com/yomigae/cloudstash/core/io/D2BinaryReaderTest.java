@@ -1,6 +1,5 @@
 package br.com.yomigae.cloudstash.core.io;
 
-import br.com.yomigae.cloudstash.core.parser.D2DataException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

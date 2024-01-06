@@ -1,9 +1,10 @@
 package br.com.yomigae.cloudstash.core.io;
 
-import br.com.yomigae.cloudstash.core.parser.D2DataException;
 import br.com.yomigae.cloudstash.core.util.ByteUtils;
 import com.google.common.primitives.Bytes;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HexFormat;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -18,10 +19,16 @@ public class D2BinaryReader {
     static final int SIZEOF_INT = 4;
 
     private final byte[] data;
-    @Deprecated
-    private int bit = 0;
     private int byteIndex = 0;
     private int bitIndex = 0;
+
+    public static D2BinaryReader from(InputStream input) {
+        try {
+            return new D2BinaryReader(input.readAllBytes());
+        } catch (IOException e) {
+            throw new D2DataException("Error reading input stream to create reader", e);
+        }
+    }
 
     public D2BinaryReader(byte[] data) {
         // Store bit-flipped bytes TODO: Why?
@@ -33,7 +40,7 @@ public class D2BinaryReader {
         for (int i = 0; i < data.length; i++) {
             // Set the stored data checksum to zero while calculating it. Otherwise, expand data into int.
             int value = (i < checksumAddress || i >= checksumAddress + SIZEOF_INT)
-                    ? 0x000000ff & flipBits(data[i])
+                    ? 0xff & flipBits(data[i])
                     : 0;
 
             // Not sure why but this is how the checksum is.
