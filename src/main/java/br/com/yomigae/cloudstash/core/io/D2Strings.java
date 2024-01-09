@@ -1,6 +1,5 @@
 package br.com.yomigae.cloudstash.core.io;
 
-import br.com.yomigae.cloudstash.core.parser.D2DataException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;

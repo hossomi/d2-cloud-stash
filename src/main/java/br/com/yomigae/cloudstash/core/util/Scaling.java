@@ -52,8 +52,8 @@ public interface Scaling {
             for (int bp : breakpoints) {
                 if (apply(bp) > value) {
                     if (apply(bp - 1) < value) {
-                        // If f(bp) is higher but f(bp-1) is lower, value is not in any breakpoint range
-                        throw new IllegalArgumentException("No breakpoint yields value %.3f".formatted(value));
+                        // If f(bp) is higher but f(bp-1) is lower, symbol is not in any breakpoint range
+                        throw new IllegalArgumentException("No breakpoint yields symbol %.3f".formatted(value));
                     }
                     // If f(bp) is higher, use previous breakpoint (already set)
                     break;
@@ -85,7 +85,7 @@ public interface Scaling {
             return -1 + range(-100, 100)
                     .filter(x -> apply(x) > value)
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("No offset yields value %.3f".formatted(value)));
+                    .orElseThrow(() -> new IllegalArgumentException("No offset yields symbol %.3f".formatted(value)));
         }
 
         @Override
