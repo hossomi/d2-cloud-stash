@@ -22,10 +22,10 @@ public class FunctionUtils {
     public static <T, R> R map(T in, Function<T, R> function) {
         return function.apply(in);
     }
+
     public static <T> void accept(T in, Consumer<T> consumer) {
         consumer.accept(in);
     }
-
 
     public static <K extends Enum<K>, V> EnumMap<K, V> toEnumMap(Class<K> type, Iterable<K> keys, Function<K, V> values) {
         return Streams.stream(keys).collect(

@@ -64,10 +64,18 @@ public class Summary {
         return this;
     }
 
+    public Summary h1() {
+        return h1("");
+    }
+
     public Summary h1(String label) {
         return line(new StringUtils.Padder(label.length() <= width ? label : "")
                 .both('=')
                 .align(width, 0.1));
+    }
+
+    public Summary h2() {
+        return h2("");
     }
 
     public Summary h2(String label) {
@@ -112,18 +120,22 @@ public class Summary {
         });
     }
 
+    public Columns columns(int n) {
+        return columns(IntStream.range(0, n).mapToObj(c -> flex(1)).toList());
+    }
+
     public Columns columns(Columns.Width... widths) {
         return columns(List.of(widths));
     }
 
-    public Columns columns(List<Columns.Width> widths) {
+    public Columns columns(List<? extends Columns.Width> widths) {
         int totalSeparatorWidth = separator.length() * (widths.size() - 1);
         int totalWidth = width - totalSeparatorWidth;
 
         int totalFlexWidth = totalWidth - widths.stream()
                 .mapToInt(w -> w.of(width))
                 .sum();
-        List<Columns.Width> flexColumns = widths.stream()
+        List<? extends Columns.Width> flexColumns = widths.stream()
                 .filter(w -> w instanceof Columns.Flexible)
                 .toList();
         int flexSum = flexColumns.stream()
@@ -183,7 +195,11 @@ public class Summary {
                     .toList();
         }
 
-        public Summary get(int col) throws IOException {
+        public int size() {
+            return columns.size();
+        }
+
+        public Summary get(int col) {
             return columns.get(col);
         }
 
@@ -206,7 +222,7 @@ public class Summary {
         }
 
         @Override
-        public void close() throws Exception {
+        public void close() {
             flush();
         }
 

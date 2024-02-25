@@ -70,14 +70,14 @@ public record D2S(
             return new Builder(difficulty);
         }
 
-        List<ActStatus<?, ?>> acts() {
+        public List<ActStatus<?, ?>> all() {
             return List.of(act1, act2, act3, act4, act5);
         }
 
         @Override
         public String toString() {
             StringBuilder string = new StringBuilder();
-            acts().forEach(act -> string.append("\n\n").append(act));
+            all().forEach(act -> string.append("\n\n").append(act));
             return string.toString();
         }
 
