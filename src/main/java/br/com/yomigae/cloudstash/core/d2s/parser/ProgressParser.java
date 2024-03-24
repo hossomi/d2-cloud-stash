@@ -6,6 +6,6 @@ import br.com.yomigae.cloudstash.core.io.D2BinaryReader;
 
 import java.util.Map;
 
-public interface ActsParser {
-    Map<Difficulty, D2S.Acts> parse(D2BinaryReader reader);
+public interface ProgressParser {
+    Map<Difficulty, D2S.Progress> parse(D2BinaryReader reader);
 }

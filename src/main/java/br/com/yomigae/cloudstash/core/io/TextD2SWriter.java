@@ -8,8 +8,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
-import static br.com.yomigae.cloudstash.core.d2s.model.EquipmentSet.MAIN;
-import static br.com.yomigae.cloudstash.core.d2s.model.EquipmentSet.SWAP;
+import static br.com.yomigae.cloudstash.core.d2s.model.Tuples.Alternate.Selection.PRIMARY;
+import static br.com.yomigae.cloudstash.core.d2s.model.Tuples.Alternate.Selection.SECONDARY;
 import static br.com.yomigae.cloudstash.core.io.Summary.Columns.Width.flex;
 import static br.com.yomigae.cloudstash.core.util.StringUtils.checkbox;
 import static java.lang.Math.floorDiv;
@@ -37,7 +37,7 @@ public class TextD2SWriter implements D2SWriter {
         try (var cols = summary.columns(flex(3), flex(1))) {
             cols.get(0)
                     .line(d2s.name().toUpperCase())
-                    .line(format("Level %d %s", d2s.level(), d2s.clazz()))
+                    .line(format("Level %d %s", d2s.level(), d2s.type()))
                     .line(format("Last played: %s", d2s.lastPlayed()));
             cols.get(1)
                     .line(checkbox("Expansion", d2s.expansion()))
@@ -52,16 +52,16 @@ public class TextD2SWriter implements D2SWriter {
     }
 
     private void writeControls(D2S d2s, Summary summary) {
-        Swap<Dual<Skill>> mouse = d2s.mouseSkill();
+        Tuples.Alternate<Tuples.Dual<Skill>> mouse = d2s.mouseSkill();
         List<Skill> hotkeys = d2s.skillHotkeys();
 
         try (var cols = summary.columns(2)) {
             cols.get(0)
-                    .h2(format(d2s.activeEquipmentSet() == MAIN ? " %s " : "[ %s ]", MAIN))
-                    .line(format("%s / %s", mouse.main().left(), mouse.main().right()));
+                    .h2(format(d2s.mouseSkill().active() == PRIMARY ? " %s " : "[ %s ]", PRIMARY))
+                    .line(format("%s / %s", mouse.primary().left(), mouse.primary().right()));
             cols.get(1)
-                    .h2(format(d2s.activeEquipmentSet() == SWAP ? " %s " : "[ %s ]", SWAP))
-                    .line(format("%s / %s", mouse.swap().left(), mouse.swap().right()));
+                    .h2(format(d2s.mouseSkill().active() == SECONDARY ? " %s " : "[ %s ]", SECONDARY))
+                    .line(format("%s / %s", mouse.secondary().left(), mouse.secondary().right()));
         }
 
         summary.line().h2(" Skill hotkeys ");
@@ -77,7 +77,7 @@ public class TextD2SWriter implements D2SWriter {
     private void writeSkills(D2S d2s, Summary summary) {
         summary.h1("[ Skills ]").line();
         try (var cols = summary.columns(3)) {
-            List<Skill> skills = Skill.forClass(d2s.clazz());
+            List<Skill> skills = Skill.forClass(d2s.type());
             int rows = skills.size() / cols.size();
             for (int i = 0; i < skills.size(); i++) {
                 Skill skill = skills.get(i);
@@ -117,7 +117,7 @@ public class TextD2SWriter implements D2SWriter {
     }
 
     private void writeActs(D2S d2s, Summary summary) {
-        d2s.acts().forEach((difficulty, acts) -> {
+        d2s.progress().forEach((difficulty, acts) -> {
             summary.h1(format("[ %s ]", difficulty.toString()));
             acts.all().forEach(act -> {
                 summary.line().h2(format("[ Act %s ]", act.act().number() + 1));

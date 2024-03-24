@@ -20,7 +20,7 @@ public class D2SParserFactory {
         return switch (version) {
             case 99 -> D2SParser.builder()
                     .headerParser(new V99HeaderParser())
-                    .actsParser(new V99ActsParser())
+                    .progressParser(new V99ProgressParser())
                     .attributesParser(new V99AttributesParser())
                     .skillsParser(new V99SkillsParser())
                     .itemsParser(new V99ItemsParser())

@@ -13,7 +13,7 @@ import java.io.InputStream;
 public class D2SParser {
 
     private final HeaderParser headerParser;
-    private final ActsParser actsParser;
+    private final ProgressParser progressParser;
     private final AttributesParser attributesParser;
     private final SkillsParser skillsParser;
     private final ItemsParser itemsParser;
@@ -33,9 +33,9 @@ public class D2SParser {
     public D2S parse(D2BinaryReader reader) {
         D2S.Builder d2s = headerParser.parse(reader);
         return d2s
-                .acts(actsParser.parse(reader))
+                .progress(progressParser.parse(reader))
                 .attributes(attributesParser.parse(reader))
-                .skills(skillsParser.parse(reader, d2s.clazz()))
+                .skills(skillsParser.parse(reader, d2s.type()))
                 .items(itemsParser.parse(reader))
                 .build();
     }

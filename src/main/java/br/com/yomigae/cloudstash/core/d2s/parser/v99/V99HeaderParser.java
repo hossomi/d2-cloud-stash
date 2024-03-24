@@ -12,6 +12,7 @@ import br.com.yomigae.cloudstash.core.io.D2BinaryReader;
 import java.time.Instant;
 import java.util.stream.IntStream;
 
+import static br.com.yomigae.cloudstash.core.util.FunctionUtils.map;
 import static java.lang.String.format;
 
 public class V99HeaderParser implements HeaderParser {
@@ -20,7 +21,6 @@ public class V99HeaderParser implements HeaderParser {
 
     @Override
     public D2S.Builder parse(D2BinaryReader reader) {
-        D2S.Builder d2s = D2S.builder();
         int signature = reader.readInt();
         int version = reader.readInt();
         int fileSize = reader.readInt();
@@ -40,16 +40,20 @@ public class V99HeaderParser implements HeaderParser {
             throw new D2ParserException(format("Invalid checksum: %d (expected %d)", checksum, actualChecksum));
         }
 
-        d2s.activeEquipmentSet(EquipmentSet.fromIndex(reader.readInt()));
+        Tuples.Alternate.Selection alternate = map(reader.readInt(), value -> switch (value) {
+            case 0 ->Tuples.Alternate.Selection.PRIMARY;
+            case 1 -> Tuples.Alternate.Selection.SECONDARY;
+            default -> throw new D2ParserException(format("Invalid weapon alternate selection: %d", value));
+        });
 
         byte flags = reader.skipBytes(16).readByte();
-        d2s
+        D2S.Builder d2s = D2S.builder()
                 .ladder((flags & 0x40) > 0)
                 .expansion((flags & 0x20) > 0)
                 .dead((flags & 0x08) > 0)
                 .hardcore((flags & 0x04) > 0)
                 .currentAct(Act.fromIndex(reader.readByte()))
-                .clazz(CharacterClass.fromIndex(reader.skipBytes(2).readByte()))
+                .type(CharacterClass.fromIndex(reader.skipBytes(2).readByte()))
                 .level(reader.skipBytes(2).readByte())
                 .lastPlayed(Instant.ofEpochSecond(reader.skipBytes(4).readInt()));
 
@@ -60,13 +64,14 @@ public class V99HeaderParser implements HeaderParser {
                             return id != 0xffff ? Skill.fromId(id) : null;
                         })
                         .toList())
-                .mouseSkill(new Swap<>(
-                        new Dual<>(
+                .mouseSkill(new Tuples.Alternate<>(
+                        new Tuples.Dual<>(
                                 Skill.fromId(reader.readInt()),
                                 Skill.fromId(reader.readInt())),
-                        new Dual<>(
+                        new Tuples.Dual<>(
                                 Skill.fromId(reader.readInt()),
-                                Skill.fromId(reader.readInt()))))
+                                Skill.fromId(reader.readInt())),
+                        alternate))
                 .name(reader.setByteIndex(0x010b).readString(16));
 
         parseHireling(reader, d2s, d2s.expansion());

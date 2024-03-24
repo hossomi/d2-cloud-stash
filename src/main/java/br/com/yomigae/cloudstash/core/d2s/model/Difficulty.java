@@ -1,34 +1,32 @@
 package br.com.yomigae.cloudstash.core.d2s.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.Collection;
 import java.util.List;
 
+import static java.lang.String.format;
+
+@Getter
 @AllArgsConstructor
 public enum Difficulty {
-    NORMAL("Normal"),
-    NIGHTMARE("Nightmare"),
-    HELL("Hell");
+    NORMAL(0),
+    NIGHTMARE(1),
+    HELL(2);
 
-    private final String name;
+    private final int index;
 
     public static Collection<Difficulty> all() {
         return List.of(values());
     }
 
     public static Difficulty fromIndex(int index) {
-        if (index < 0 || index >= values().length) {
-            throw new IllegalArgumentException(String.format(
-                    "Invalid Difficulty index (%d-%d): %d",
-                    0, values().length - 1, index));
-        }
-        return values()[index];
+        return all().stream()
+                .filter(difficulty -> difficulty.index() == index)
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException(format(
+                        "Invalid %s index: %d",
+                        Difficulty.class.getSimpleName(), index)));
     }
-
-    @Override
-    public String toString() {
-        return name;
-    }
-
 }

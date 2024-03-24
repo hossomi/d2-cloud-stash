@@ -1,11 +1,8 @@
-package br.com.yomigae.cloudstash.core.d2s.model.acts;
+package br.com.yomigae.cloudstash.core.d2s.model.progress;
 
+import br.com.yomigae.cloudstash.core.d2s.model.progress.QuestStatus.Generic;
 import br.com.yomigae.cloudstash.core.io.D2Strings.D2String;
-import br.com.yomigae.cloudstash.core.d2s.model.acts.QuestStatus.Generic;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import static br.com.yomigae.cloudstash.core.io.D2Strings.D2String.d2String;
@@ -14,7 +11,6 @@ import static br.com.yomigae.cloudstash.core.io.D2Strings.D2String.d2String;
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public sealed abstract class Quest<S extends QuestStatus> {
-
     // @formatter:off
     public static final Act1.DenOfEvil              DEN_OF_EVIL               = new Act1.DenOfEvil();
     public static final Act1.SistersBurialGrounds   SISTERS_BURIAL_GROUNDS    = new Act1.SistersBurialGrounds();
@@ -163,8 +159,12 @@ public sealed abstract class Quest<S extends QuestStatus> {
         public static final class PrisonOfIce extends Act5<PrisonOfIce.Status> {
             private PrisonOfIce() { super(d2String("qstsa5q3")); }
 
+            @Data
             @Builder
-            public record Status(boolean completed, boolean scrollConsumed) implements QuestStatus { }
+            public static final class Status implements QuestStatus {
+                private boolean completed;
+                private boolean scrollConsumed;
+            }
         }
 
         public static final class RescueOnMountainArreat extends Act5<Generic> {
