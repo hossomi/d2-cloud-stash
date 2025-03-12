@@ -79,7 +79,7 @@ only common milestone is the bit `0x0001` which marks the quest completion. See 
 | `0x0e`  | `short`    | `1` if travelled to Act 2                            |
 | `0x10`  | `short`    | `1` if introduced to Jerhyn                          |
 | `0x12`  | `short`    | Act 2.1: Radament's Lair                             |
-| `0x14`  | `short`    | Act 2.2: The Hodradric Staff                         |
+| `0x14`  | `short`    | Act 2.2: The Horadric Staff                          |
 | `0x16`  | `short`    | Act 2.3: Tainted Sun                                 |
 | `0x18`  | `short`    | Act 2.4: Arcane Sanctuary                            |
 | `0x1a`  | `short`    | Act 2.5: The Summoner                                |

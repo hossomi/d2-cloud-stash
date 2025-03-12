@@ -33,8 +33,8 @@ public record Skill(
     public static final Map<String, Meta> SKILL_META;
     public static final List<Skill> SKILLS;
     private static final Comparator<Skill> COMPARATOR = Comparator
-            .<Skill>comparingInt(s -> s.meta().page())
-            .thenComparingInt(s -> s.meta().row())
+            .<Skill>comparingInt(s -> s.meta().row())
+            .thenComparingInt(s -> s.meta().page())
             .thenComparingInt(s -> s.meta().col());
 
 
@@ -62,7 +62,6 @@ public record Skill(
                         .meta(row.meta())
                         .requiredLevel(row.row().getInt("reqlevel"))
                         .build())
-                .sorted()
                 .toList();
     }
 

@@ -1,8 +1,10 @@
 package br.com.yomigae.cloudstash.core.d2s.parser.v99;
 
-import br.com.yomigae.cloudstash.core.d2s.model.*;
-import br.com.yomigae.cloudstash.core.d2s.model.character.CharacterClass;
+import br.com.yomigae.cloudstash.core.d2s.model.Act;
 import br.com.yomigae.cloudstash.core.d2s.model.D2S;
+import br.com.yomigae.cloudstash.core.d2s.model.Skill;
+import br.com.yomigae.cloudstash.core.d2s.model.Tuples;
+import br.com.yomigae.cloudstash.core.d2s.model.character.CharacterClass;
 import br.com.yomigae.cloudstash.core.d2s.model.hireling.Hireling;
 import br.com.yomigae.cloudstash.core.d2s.model.hireling.HirelingType;
 import br.com.yomigae.cloudstash.core.d2s.parser.D2ParserException;
@@ -41,7 +43,7 @@ public class V99HeaderParser implements HeaderParser {
         }
 
         Tuples.Alternate.Selection alternate = map(reader.readInt(), value -> switch (value) {
-            case 0 ->Tuples.Alternate.Selection.PRIMARY;
+            case 0 -> Tuples.Alternate.Selection.PRIMARY;
             case 1 -> Tuples.Alternate.Selection.SECONDARY;
             default -> throw new D2ParserException(format("Invalid weapon alternate selection: %d", value));
         });
@@ -59,10 +61,10 @@ public class V99HeaderParser implements HeaderParser {
 
         reader.skipBytes(4);
         d2s.skillHotkeys(IntStream.range(0, 16)
-                        .mapToObj(x -> {
-                            int id = reader.readInt();
-                            return id != 0xffff ? Skill.fromId(id) : null;
-                        })
+                        .map(x -> reader.readInt())
+                        .mapToObj(value -> value != 0xffff
+                                ? new D2S.SkillHotkey((value & 0x8000) > 0, Skill.fromId(value & 0xff))
+                                : null)
                         .toList())
                 .mouseSkill(new Tuples.Alternate<>(
                         new Tuples.Dual<>(

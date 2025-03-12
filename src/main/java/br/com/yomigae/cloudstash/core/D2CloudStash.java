@@ -13,10 +13,11 @@ import static java.util.Objects.requireNonNull;
 
 public class D2CloudStash {
     public static void main(String[] args) throws Exception {
-        InputStream input = requireNonNull(D2CloudStash.class.getResourceAsStream("/samples/Zeus.d2s"));
+        String sampleName = "Starfire-6";
+        InputStream input = requireNonNull(D2CloudStash.class.getResourceAsStream("/samples/" + sampleName + ".d2s"));
         D2BinaryReader reader = D2BinaryReader.from(input);
         D2SParser p = D2SParserFactory.instance().createParser(reader);
         D2S c = p.parse(reader);
-        new TextD2SWriter().write(c, new FileOutputStream("Test.txt"));
+        new TextD2SWriter().write(c, new FileOutputStream(sampleName + ".txt"));
     }
 }

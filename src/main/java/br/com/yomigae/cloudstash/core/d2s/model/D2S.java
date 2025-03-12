@@ -5,6 +5,7 @@ import br.com.yomigae.cloudstash.core.d2s.model.Tuples.Dual;
 import br.com.yomigae.cloudstash.core.d2s.model.progress.Progress.*;
 import br.com.yomigae.cloudstash.core.d2s.model.character.CharacterClass;
 import br.com.yomigae.cloudstash.core.d2s.model.hireling.Hireling;
+import br.com.yomigae.cloudstash.core.util.Flags;
 import lombok.Builder;
 import lombok.*;
 
@@ -29,7 +30,7 @@ public final class D2S {
     private Act currentAct;
 
     private Alternate<Dual<Skill>> mouseSkill;
-    private List<Skill> skillHotkeys;
+    private List<SkillHotkey> skillHotkeys;
     private Hireling hireling;
 
     @Singular("progress")
@@ -40,6 +41,13 @@ public final class D2S {
     private final Map<Skill, Integer> skills;
     @Singular
     private final Collection<Object> items;
+
+    @Data
+    @AllArgsConstructor
+    public static final class SkillHotkey {
+        private boolean left;
+        private Skill skill;
+    }
 
     @Data
     @AllArgsConstructor

@@ -1,6 +1,9 @@
 package br.com.yomigae.cloudstash.core.io;
 
-import br.com.yomigae.cloudstash.core.d2s.model.*;
+import br.com.yomigae.cloudstash.core.d2s.model.Attribute;
+import br.com.yomigae.cloudstash.core.d2s.model.D2S;
+import br.com.yomigae.cloudstash.core.d2s.model.Skill;
+import br.com.yomigae.cloudstash.core.d2s.model.Tuples;
 import br.com.yomigae.cloudstash.core.d2s.model.hireling.Hireling;
 
 import java.io.IOException;
@@ -14,7 +17,6 @@ import static br.com.yomigae.cloudstash.core.io.Summary.Columns.Width.flex;
 import static br.com.yomigae.cloudstash.core.util.StringUtils.checkbox;
 import static java.lang.Math.floorDiv;
 import static java.lang.String.format;
-import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.IntStream.range;
 
 public class TextD2SWriter implements D2SWriter {
@@ -53,7 +55,7 @@ public class TextD2SWriter implements D2SWriter {
 
     private void writeControls(D2S d2s, Summary summary) {
         Tuples.Alternate<Tuples.Dual<Skill>> mouse = d2s.mouseSkill();
-        List<Skill> hotkeys = d2s.skillHotkeys();
+        List<D2S.SkillHotkey> hotkeys = d2s.skillHotkeys();
 
         try (var cols = summary.columns(2)) {
             cols.get(0)
@@ -66,10 +68,18 @@ public class TextD2SWriter implements D2SWriter {
 
         summary.line().h2(" Skill hotkeys ");
         try (var cols = summary.columns(2)) {
-            range(0, 8).forEach(i -> cols.get(0)
-                    .line(format("%02d. %s", i, requireNonNullElse(hotkeys.get(i), "-"))));
-            range(8, 16).forEach(i -> cols.get(1)
-                    .line(format("%02d. %s", i, requireNonNullElse(hotkeys.get(i), "-"))));
+            range(0, 8).forEach(i -> {
+                D2S.SkillHotkey hk = hotkeys.get(i);
+                cols.get(0).line(hk != null
+                        ? format("%02d. [%s] %s", i, hk.left() ? "L" : "R", hk.skill())
+                        : "-");
+            });
+            range(8, 16).forEach(i -> {
+                D2S.SkillHotkey hk = hotkeys.get(i);
+                cols.get(1).line(hk != null
+                        ? format("%02d. [%s] %s", i, hk.left() ? "L" : "R", hk.skill())
+                        : "-");
+            });
         }
         summary.line();
     }
